@@ -1,27 +1,26 @@
 -- display configs
 local screen1Config = {
     vertical = true,
-    titleFontSize = 100,
-    titleHeight = 120,
-    fontSize = 60,
+    titleFontSize = 75,
+    titleHeight = 100,
+    headerRuleHeight = 5,
+    fontSize = 40,
     xPadding = 20,
     tableXPadding = 10,
-    rowHeight = 70,
+    rowHeight = 44,
     rowPadding = 10,
+    countOffset = -150,
+    columns = 2,
+    colspan = 2,
     tables = {}
 }
 screen1Config.tables[#screen1Config.tables + 1] = {
-    -- TODO configure source, if both core and receiver default to core, otherwise whichever is present unless specified
-    title = "Gasses",
-    columns = 2,
-    reverse = true, -- TODO read at table, row, and item level for overrides
-    rows = {
-        {{name = "Pure Hydrogen", label = "Hydrogen"}, {name = "Pure Oxygen", label = "Oxygen"}},
-    }
+    columns = {"Ore", "Pure"},
+    rows = {}
 }
 screen1Config.tables[#screen1Config.tables + 1] = {
     title = "Tier 1",
-    columns = 2, -- TODO read type for number (count) or table of strings (header row)
+    columns = 2,
     rows = {
         {"Bauxite", {name = "Pure Aluminium", label = "Aluminium"}},
         {"Coal", {name = "Pure Carbon", label = "Carbon"}},
@@ -51,6 +50,7 @@ screen1Config.tables[#screen1Config.tables + 1] = {
 }
 screen1Config.tables[#screen1Config.tables + 1] = {
     title = "Tier 4",
+    colspan = 2,
     columns = 2,
     rows = {
         {"Cobaltite", {name = "Pure Cobalt", label = "Cobalt"}},
@@ -67,6 +67,24 @@ screen1Config.tables[#screen1Config.tables + 1] = {
         {"Rhodonite", {name = "Pure Manganese", label = "Manganese"}},
         {"Illmenite", {name = "Pure Titanium", label = "Titanium"}},
         {"Vanadinite", {name = "Vanadium Pure", label = "Vanadium"}},
+    }
+}
+screen1Config.tables[#screen1Config.tables + 1] = {
+    colspan = 1,
+    columns = {"Gasses"},
+    reverse = true,
+    rows = {
+        {{name = "Pure Hydrogen", label = "Hydrogen"}},
+        {{name = "Pure Oxygen", label = "Oxygen"}},
+    }
+}
+screen1Config.tables[#screen1Config.tables + 1] = {
+    colspan = 1,
+    columns = {"Catalyst"},
+    rows = {
+        {"Catalyst 3"},
+        {"Catalyst 4"},
+        {"Catalyst 5"},
     }
 }
 

@@ -38,12 +38,12 @@ local STYLE_TEMPLATE = [[
 <style>
 text {
     font-size: %fpx;
+    fill: white;
     font-family: Arial;
     text-transform: none;
 }
 text.blockTitle {
     font-size: %fpx;
-    fill: green;
     text-anchor: middle;
 }
 .empty .label {
@@ -55,14 +55,17 @@ text.blockTitle {
 .full .label {
     fill: #333;
 }
-.fillHigh {
+.fillHigh, .fillHigh text {
     fill: green;
 }
-.fillMed {
+.fillMed, .fillMed text {
     fill: yellow;
 }
-.fillLow {
+.fillLow, .fillLow text {
     fill: red;
+}
+rect.headerRule {
+    fill: white;
 }
 </style>
 ]]
@@ -84,7 +87,7 @@ local ROW_TEMPLATE = [[
         <text x="$rightText" y="$textHeight" text-anchor="end">%.0f<tspan class="label">%%</tspan></text>
     </g>
     <g class="full" clip-path="url(#percentClip%d)">
-        <rect x="0" y="0" width="%.1f" height="64" class="%s"/>
+        <rect x="0" y="0" width="%.1f" height="%.1f" class="%s"/>
         <text x="$leftText" y="$textHeight">%s</text>
         <text x="$countOffset" y="$textHeight" text-anchor="end">%s</text>
         <text x="$countOffset" y="$textHeight" class="label">%s</text>
@@ -93,7 +96,7 @@ local ROW_TEMPLATE = [[
 </g>
 ]]
 local rowClassIndex = 0
-local function generateRowCell(item, itemData, xStart, yStart, width, height, reverse)
+local function generateRowCell(item, itemData, xStart, yStart, width, height, countOffset, reverse)
     rowClassIndex = rowClassIndex + 1
 
     local itemName, itemLabel
@@ -147,14 +150,37 @@ local function generateRowCell(item, itemData, xStart, yStart, width, height, re
 
     local rowSvg = string.format(ROW_TEMPLATE, xStart, yStart,
                rowClassIndex, (1 - percent) * width, barColor, itemLabel, printableCount, countUnits,
-               printablePercent, rowClassIndex, width, barColor, itemLabel, printableCount, countUnits, printablePercent)
+               printablePercent, rowClassIndex, width, height, barColor, itemLabel, printableCount, countUnits, printablePercent)
 
     rowSvg = string.gsub(rowSvg, "$textHeight", height * 3 / 4)
     rowSvg = string.gsub(rowSvg, "$leftText", 5)
-    rowSvg = string.gsub(rowSvg, "$countOffset", width - 200)
+    if countOffset < 0 then
+        rowSvg = string.gsub(rowSvg, "$countOffset", width + countOffset)
+    else
+        rowSvg = string.gsub(rowSvg, "$countOffset", countOffset)
+    end
     rowSvg = string.gsub(rowSvg, "$rightText", width - 5)
 
     return rowSvg
+end
+
+local function inheritConfig(parentConfig, childConfig)
+    local resultConfig = {}
+    for key, value in pairs(parentConfig) do
+        if type(value) ~= "table" then
+            resultConfig[key] = value
+        end
+    end
+
+    if type(childConfig) == "table" then
+        for key, value in pairs(childConfig) do
+            if type(value) ~= "table" then
+                resultConfig[key] = value
+            end
+        end
+    end
+
+    return resultConfig
 end
 
 local function generateTable(table, screenConfig, xOffset, yOffset, width, itemData)
@@ -166,32 +192,37 @@ local function generateTable(table, screenConfig, xOffset, yOffset, width, itemD
         yOffset = yOffset + screenConfig.titleHeight
     end
 
-    local columns = table.columns or 1
+    local columns
+    if type(table.columns) == "table" then
+        columns = #table.columns
+    else
+        columns = table.columns or 1
+    end
     local columnXPadding = table.xPadding or screenConfig.tableXPadding or screenConfig.xPadding or 0
 
     local columnWidth = (width - (columns - 1) * columnXPadding) / columns
     local rowHeight = table.rowHeight or screenConfig.rowHeight
     local rowPadding = table.rowPadding or screenConfig.rowPadding
 
-    local tableReverse = table.reverse
+    if type(table.columns) == "table" then
+        for i, columnHeader in pairs(table.columns) do
+            local headerX = xOffset + (i - 1) * (columnWidth + columnXPadding) + columnWidth / 2
+            document = document .. string.format([[<text x="%f" y="%f" text-anchor="middle">%s</text>]], headerX, yOffset + screenConfig.rowHeight * 3 / 4, columnHeader)
+        end
+        yOffset = yOffset + rowHeight
+        document = document .. string.format([[<rect x="%f" y="%f" width="%f" height="%f" class="headerRule"/>]], xOffset, yOffset, width, screenConfig.headerRuleHeight)
+        yOffset = yOffset + screenConfig.headerRuleHeight
+    end
 
     for _, row in pairs(table.rows) do
-        local rowReverse = row.reverse
-        if rowReverse == nil then
-            rowReverse = tableReverse
-        end
+        local rowConfig = inheritConfig(table, row)
 
         local column = 0
         for _, item in pairs(row) do
-            local itemReverse
-            if type(item) == "table" and item.reverse ~= nil then
-                itemReverse = item.reverse
-            else
-                itemReverse = rowReverse
-            end
+            local itemConfig = inheritConfig(rowConfig, item)
 
             local rowX = xOffset + column * (columnWidth + columnXPadding)
-            document = document .. generateRowCell(item, itemData, rowX, yOffset, columnWidth, rowHeight, itemReverse)
+            document = document .. generateRowCell(item, itemData, rowX, yOffset, columnWidth, rowHeight, screenConfig.countOffset, itemConfig.reverse)
 
             column = column + 1
         end
@@ -217,19 +248,31 @@ local function populateScreen(screen, screenConfig, itemData)
         width = 1920
     end
 
-    local xOffset, yOffset = 0, 0
+    local yOffset = 0
     local maxYOffset = 0
 
-    for _, table in pairs(screenConfig.tables) do
-        -- xOffset = xOffset + screenConfig.xPadding
-        local tableWidth = width - screenConfig.xPadding * 2
+    local columns = screenConfig.columns or 1
+    local columnWidth = (width - (columns - 1) * screenConfig.xPadding) / columns
+    local column = 0
 
-        local tableElement, tableYEnd = generateTable(table, screenConfig, xOffset, yOffset, width, itemData)
+    for _, table in pairs(screenConfig.tables) do
+        local tableConfig = inheritConfig(screenConfig, table)
+
+        local xOffset = screenConfig.xPadding + column * columnWidth + math.max(0, column - 1) * screenConfig.xPadding
+
+        local colspan = tableConfig.colspan or 1
+        local tableWidth = (width - screenConfig.xPadding) / columns * colspan - screenConfig.xPadding
+
+        local tableElement, tableYEnd = generateTable(table, screenConfig, xOffset, yOffset, tableWidth, itemData)
         document = document .. tableElement
         maxYOffset = math.max(maxYOffset, tableYEnd)
+        column = column + colspan
 
-        yOffset = maxYOffset
-        maxYOffset = 0
+        if column >= columns then
+            yOffset = maxYOffset
+            maxYOffset = 0
+            column = 0
+        end
     end
 
     if screenConfig.vertical then
