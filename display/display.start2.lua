@@ -3,11 +3,17 @@ local elementsReadPerUpdate = 100 --export: The number of elements to process fo
 local maxMassError = 0.001 -- max error allowed for container lookups
 
 -- localize global lookups
-local slots = _G.slots
+local slots = {}
+slots.displays = _G.displays
 local Utilities = _G.Utilities
 local InventoryCommon = _G.InventoryCommon
 local json = _G.json
 local math = _G.math
+
+-- if not found by name will autodetect
+slots.databank = databank
+slots.core = core
+slots.receiver = receiver
 
 -- validate inputs
 local screenIndex = 1
@@ -25,9 +31,12 @@ end
 -- link missing slot inputs / validate provided slots
 local module = "inventory-report"
 slots.core = Utilities.loadSlot(slots.core, {"CoreUnitDynamic", "CoreUnitStatic", "CoreUnitSpace"}, nil, module,
-                    "core", true, "No core link found, will default to emitter for data population.")
-slots.databank = Utilities.loadSlot(slots.databank, "DataBankUnit", nil, module, "databank", slots.core,
-                        "Databank link not found, required for reading data from core.")
+                    "core", true, "No core link found, will default to receiver for data population.")
+local databankOptionalMsg = nil
+if slots.core then
+    databankOptionalMsg = "Databank link not found, required for reading container data from core."
+end
+slots.databank = Utilities.loadSlot(slots.databank, "DataBankUnit", nil, module, "databank", true, databankOptionalMsg)
 slots.receiver = Utilities.loadSlot(slots.receiver, "ReceiverUnit", nil, module, "receiver", slots.core)
 
 -- hide widget
@@ -155,9 +164,9 @@ local function generateRowCell(item, itemData, xStart, yStart, width, height, co
     rowSvg = string.gsub(rowSvg, "$textHeight", height * 3 / 4)
     rowSvg = string.gsub(rowSvg, "$leftText", 5)
     if countOffset < 0 then
-        rowSvg = string.gsub(rowSvg, "$countOffset", width + countOffset)
+        rowSvg = string.gsub(rowSvg, "$countOffset", width + countOffset - 5)
     else
-        rowSvg = string.gsub(rowSvg, "$countOffset", countOffset)
+        rowSvg = string.gsub(rowSvg, "$countOffset", 5 + countOffset)
     end
     rowSvg = string.gsub(rowSvg, "$rightText", width - 5)
 
@@ -183,13 +192,13 @@ local function inheritConfig(parentConfig, childConfig)
     return resultConfig
 end
 
-local function generateTable(table, screenConfig, xOffset, yOffset, width, itemData)
+local function generateTable(table, tableConfig, xOffset, yOffset, width, itemData)
     local title = table.title
 
     local document = ""
     if title then
-        document = string.format([[<text class="blockTitle" x="%f" y="%f">%s</text>]], xOffset + width / 2, yOffset + screenConfig.titleHeight * 3 / 4, title)
-        yOffset = yOffset + screenConfig.titleHeight
+        document = string.format([[<text class="blockTitle" x="%f" y="%f">%s</text>]], xOffset + width / 2, yOffset + tableConfig.titleHeight * 3 / 4, title)
+        yOffset = yOffset + tableConfig.titleHeight
     end
 
     local columns
@@ -198,31 +207,31 @@ local function generateTable(table, screenConfig, xOffset, yOffset, width, itemD
     else
         columns = table.columns or 1
     end
-    local columnXPadding = table.xPadding or screenConfig.tableXPadding or screenConfig.xPadding or 0
+    local columnXPadding = tableConfig.xPadding or tableConfig.xPadding or 0
 
     local columnWidth = (width - (columns - 1) * columnXPadding) / columns
-    local rowHeight = table.rowHeight or screenConfig.rowHeight
-    local rowPadding = table.rowPadding or screenConfig.rowPadding
+    local rowHeight = table.rowHeight or tableConfig.rowHeight
+    local rowPadding = table.rowPadding or tableConfig.rowPadding
 
     if type(table.columns) == "table" then
         for i, columnHeader in pairs(table.columns) do
             local headerX = xOffset + (i - 1) * (columnWidth + columnXPadding) + columnWidth / 2
-            document = document .. string.format([[<text x="%f" y="%f" text-anchor="middle">%s</text>]], headerX, yOffset + screenConfig.rowHeight * 3 / 4, columnHeader)
+            document = document .. string.format([[<text x="%f" y="%f" text-anchor="middle">%s</text>]], headerX, yOffset + tableConfig.rowHeight * 3 / 4, columnHeader)
         end
         yOffset = yOffset + rowHeight
-        document = document .. string.format([[<rect x="%f" y="%f" width="%f" height="%f" class="headerRule"/>]], xOffset, yOffset, width, screenConfig.headerRuleHeight)
-        yOffset = yOffset + screenConfig.headerRuleHeight
+        document = document .. string.format([[<rect x="%f" y="%f" width="%f" height="%f" class="headerRule"/>]], xOffset, yOffset, width, tableConfig.headerRuleHeight)
+        yOffset = yOffset + tableConfig.headerRuleHeight
     end
 
     for _, row in pairs(table.rows) do
-        local rowConfig = inheritConfig(table, row)
+        local rowConfig = inheritConfig(tableConfig, row)
 
         local column = 0
         for _, item in pairs(row) do
             local itemConfig = inheritConfig(rowConfig, item)
 
             local rowX = xOffset + column * (columnWidth + columnXPadding)
-            document = document .. generateRowCell(item, itemData, rowX, yOffset, columnWidth, rowHeight, screenConfig.countOffset, itemConfig.reverse)
+            document = document .. generateRowCell(item, itemData, rowX, yOffset, columnWidth, rowHeight, tableConfig.countOffset, itemConfig.reverse)
 
             column = column + 1
         end
@@ -263,7 +272,7 @@ local function populateScreen(screen, screenConfig, itemData)
         local colspan = tableConfig.colspan or 1
         local tableWidth = (width - screenConfig.xPadding) / columns * colspan - screenConfig.xPadding
 
-        local tableElement, tableYEnd = generateTable(table, screenConfig, xOffset, yOffset, tableWidth, itemData)
+        local tableElement, tableYEnd = generateTable(table, tableConfig, xOffset, yOffset, tableWidth, itemData)
         document = document .. tableElement
         maxYOffset = math.max(maxYOffset, tableYEnd)
         column = column + colspan
@@ -375,7 +384,6 @@ local function updateData()
                 break
             end
 
-
             -- read container data using databank values
             local containerIdListKey = name .. InventoryCommon.constants.CONTAINER_SUFFIX
             if not (slots.databank.hasKey(name) == 1 and slots.databank.hasKey(containerIdListKey) == 1) then
@@ -404,7 +412,7 @@ local function updateData()
                     maxItems = containerDetails.maxVolume
                 else
                     itemUnits = ""
-                    maxItems = math.floor(itemDetails.unitVolume / containerDetails.maxVolume)
+                    maxItems = math.floor(containerDetails.maxVolume / itemDetails.unitVolume)
                 end
 
                 data.units = itemUnits
@@ -449,6 +457,7 @@ local function updateData()
         end
     end
 
+    resumeOnUpdate = false
     unit.exit()
 end
 

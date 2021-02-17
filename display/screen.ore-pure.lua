@@ -1,26 +1,30 @@
--- display configs
-local screen1Config = {
+local orePureConfig = {
     vertical = true,
     titleFontSize = 75,
     titleHeight = 100,
     headerRuleHeight = 5,
-    fontSize = 40,
+    fontSize = 45,
     xPadding = 20,
     tableXPadding = 10,
-    rowHeight = 44,
+    rowHeight = 50,
     rowPadding = 10,
-    countOffset = -150,
+    countOffset = -145,
     columns = 2,
     colspan = 2,
     tables = {}
 }
-screen1Config.tables[#screen1Config.tables + 1] = {
-    columns = {"Ore", "Pure"},
+orePureConfig.tables[#orePureConfig.tables + 1] = {
+    title = "Ore",
+    colspan = 1,
     rows = {}
 }
-screen1Config.tables[#screen1Config.tables + 1] = {
-    title = "Tier 1",
-    columns = 2,
+orePureConfig.tables[#orePureConfig.tables + 1] = {
+    title = "Pure",
+    colspan = 1,
+    rows = {}
+}
+orePureConfig.tables[#orePureConfig.tables + 1] = {
+    columns = {"Tier 1", ""},
     rows = {
         {"Bauxite", {name = "Pure Aluminium", label = "Aluminium"}},
         {"Coal", {name = "Pure Carbon", label = "Carbon"}},
@@ -28,9 +32,8 @@ screen1Config.tables[#screen1Config.tables + 1] = {
         {"Quartz", {name = "Pure Silicon", label = "Silicon"}},
     }
 }
-screen1Config.tables[#screen1Config.tables + 1] = {
-    title = "Tier 2",
-    columns = 2,
+orePureConfig.tables[#orePureConfig.tables + 1] = {
+    columns = {"Tier 2", ""},
     rows = {
         {"Limestone", {name = "Pure Calcium", label = "Calcium"}},
         {"Chromite", {name = "Pure Chromium", label = "Chromium"}},
@@ -38,9 +41,8 @@ screen1Config.tables[#screen1Config.tables + 1] = {
         {"Natron", {name = "Pure Sodium", label = "Sodium"}},
     }
 }
-screen1Config.tables[#screen1Config.tables + 1] = {
-    title = "Tier 3",
-    columns = 2,
+orePureConfig.tables[#orePureConfig.tables + 1] = {
+    columns = {"Tier 3", ""},
     rows = {
         {"Petalite", {name = "Pure Lithium", label = "Lithium"}},
         {"Garnierite", {name = "Nickel Pure", label = "Nickel"}},
@@ -48,20 +50,17 @@ screen1Config.tables[#screen1Config.tables + 1] = {
         {"Pyrite", {name = "Pure Sulfur", label = "Sulfur"}},
     }
 }
-screen1Config.tables[#screen1Config.tables + 1] = {
-    title = "Tier 4",
-    colspan = 2,
-    columns = 2,
+orePureConfig.tables[#orePureConfig.tables + 1] = {
+    columns = {"Tier 4", ""},
     rows = {
         {"Cobaltite", {name = "Pure Cobalt", label = "Cobalt"}},
         {"Cryolite", {name = "Pure Cryolite", label = "Cryolite"}},
-        {"Gold Nuggets", {name = "Pure Gold", label = "Gold"}},
+        {{name = "Gold Nuggets", label = "Gold Ngts"}, {name = "Pure Gold", label = "Gold"}},
         {"Kolbeckite", {name = "Scandium Pure", label = "Scandium"}},
     }
 }
-screen1Config.tables[#screen1Config.tables + 1] = {
-    title = "Tier 5",
-    columns = 2,
+orePureConfig.tables[#orePureConfig.tables + 1] = {
+    columns = {"Tier 5", ""},
     rows = {
         {"Columbite", {name = "Niobium Pure", label = "Niobium"}},
         {"Rhodonite", {name = "Pure Manganese", label = "Manganese"}},
@@ -69,18 +68,20 @@ screen1Config.tables[#screen1Config.tables + 1] = {
         {"Vanadinite", {name = "Vanadium Pure", label = "Vanadium"}},
     }
 }
-screen1Config.tables[#screen1Config.tables + 1] = {
+orePureConfig.tables[#orePureConfig.tables + 1] = {
+    title = "Gasses",
     colspan = 1,
-    columns = {"Gasses"},
+    columns = 1,
     reverse = true,
     rows = {
         {{name = "Pure Hydrogen", label = "Hydrogen"}},
         {{name = "Pure Oxygen", label = "Oxygen"}},
     }
 }
-screen1Config.tables[#screen1Config.tables + 1] = {
+orePureConfig.tables[#orePureConfig.tables + 1] = {
+    title = "Catalyst",
     colspan = 1,
-    columns = {"Catalyst"},
+    columns = 1,
     rows = {
         {"Catalyst 3"},
         {"Catalyst 4"},
@@ -88,14 +89,10 @@ screen1Config.tables[#screen1Config.tables + 1] = {
     }
 }
 
--- slot definitions
-_G.slots = {}
+-- ensure display array exists
+if not _G.displays then
+    _G.displays = {}
+end
 
--- if not found by name will autodetect
-_G.slots.databank = databank
-_G.slots.core = core
-_G.slots.receiver = receiver
-
--- must be specified by name to properly associate screens to displays
-_G.slots.displays = {}
-_G.slots.displays[orePure] = screen1Config
+-- must link by slot name
+_G.displays[${slotName}] = orePureConfig

@@ -43,7 +43,8 @@ local function processContainer(container)
     local name, quantity, unitMass, unitVolume, isMaterial
     for _, item in pairs(itemsList) do
         if name then
-            system.print(string.format("Error: Multiple item types in container id %d: %s, %s, ...", id, name, item.name));
+            system.print(
+                string.format("Error: Multiple item types in container id %d: %s, %s, ...", id, name, item.name));
             return
         else
             name = string.lower(item.name)
@@ -77,7 +78,6 @@ local function processContainer(container)
     table.insert(currentContainers, id)
     slots.databank.setStringValue(itemContainersKey, _G.InventoryCommon.intListToJson(currentContainers))
 
-
     local density = container.getItemsMass() / quantity
     local containerOptimization = density / unitMass
     local containerKey = _G.InventoryCommon.constants.CONTAINER_PREFIX .. id
@@ -88,6 +88,8 @@ local function processContainer(container)
     }
     local containerString = json.encode(containerDetails)
     slots.databank.setStringValue(containerKey, containerString)
+
+    system.print(string.format("Registered %s to container id %d.", name, id))
 
     containerStatus[container].complete = true
 end
@@ -119,7 +121,6 @@ end
 
 function _G.storageAcquired(slot)
     containerStatus[slots.containers[slot]].available = true
-    system.print("response " .. slot)
 
     _G.updateTick()
 end
