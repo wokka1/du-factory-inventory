@@ -1,3 +1,7 @@
+results/
+templateExports/
+*.luacov
+
 # ---> Lua
 # Compiled Lua sources
 luac.out
