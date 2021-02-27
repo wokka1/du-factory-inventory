@@ -15,7 +15,7 @@
         "-3":{"name":"library","type":{"events":[],"methods":[]}}
     },
     "handlers":[
-        {"code":"${file:collector.start.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:unit}"},"key":"${key}"},
+        {"code":"${file:collector.unit.start.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:unit}"},"key":"${key}"},
         {"code":"_G.updateTick()","filter":{"args":[${args:update}],"signature":"tick(timerId)","slotKey":"${slotKey:unit}"},"key":"${key}"},
         {"code":"_G.storageAcquired(\"${slotname}\")","filter":{"args":[],"signature":"storageAcquired()","slotKey":"0"},"key":"${key}"},
         {"code":"_G.storageAcquired(\"${slotname}\")","filter":{"args":[],"signature":"storageAcquired()","slotKey":"1"},"key":"${key}"},
@@ -28,6 +28,7 @@
         {"code":"_G.storageAcquired(\"${slotname}\")","filter":{"args":[],"signature":"storageAcquired()","slotKey":"8"},"key":"${key}"},
         {"code":"_G.storageAcquired(\"${slotname}\")","filter":{"args":[],"signature":"storageAcquired()","slotKey":"9"},"key":"${key}"},
         {"code":"${file:../../du-utils/duutils/Utilities.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:library}"},"key":"${key}"},
+        {"code":"${file:../../du-utils/duutils/Datastore.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:library}"},"key":"${key}"},
         {"code":"${file:../common/InventoryCommon.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:library}"},"key":"${key}"}
     ],
     "methods":[],

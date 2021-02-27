@@ -39,9 +39,13 @@ function _G.InventoryCommon.removeContainerFromDb(databank, containerId)
     for itemContainers in string.gmatch(allKeys, CONTAINERS_DB_PATTERN) do
         containerList = databank.getStringValue(itemContainers)
 
-        prefix, suffix = string.match(containerList, "(%D)%s*" .. containerId .. "%s*(%D)")
+        local prefix, suffix, changed
+        repeat
+            prefix, suffix = string.match(containerList, "(%D)%s*" .. containerId .. "%s*(%D)")
+            if not prefix then
+                break
+            end
 
-        if prefix then
             if prefix == suffix then
                 replaceText = prefix
             elseif prefix == "," then
@@ -57,7 +61,38 @@ function _G.InventoryCommon.removeContainerFromDb(databank, containerId)
                 prefix = "%["
             end
 
-            databank.setStringValue(itemContainers, string.gsub(containerList, prefix .. containerId .. suffix, replaceText))
+            containerList = string.gsub(containerList, prefix .. containerId .. suffix, replaceText)
+            changed = true
+        until not prefix
+
+        if changed then
+            databank.setStringValue(itemContainers, containerList)
+        end
+    end
+end
+
+--- Examines the databank, searching for duplicate keys, containers with multiple mappings, etc.
+local ITEM_CONTAINER_PATTERN = ".-" .. constants.CONTAINER_SUFFIX
+function _G.InventoryCommon.validateDb(databank)
+    local keyCount = {}
+    local containerCount = {}
+    for key in string.gmatch(databank.getKeys(), "\"(.-)\"") do
+        keyCount[key] = (keyCount[key] or 0) + 1
+
+        if string.match(key, ITEM_CONTAINER_PATTERN) then
+            for _, containerId in pairs(InventoryCommon.jsonToIntList(databank.getStringValue(key))) do
+                containerCount[containerId] = (containerCount[containerId] or 0) + 1
+            end
+        end
+    end
+    for key, count in pairs(keyCount) do
+        if count > 1 then
+            system.print(string.format("Duplicate key: %s (%d)", key, count))
+        end
+    end
+    for containerId, count in pairs(containerCount) do
+        if count > 1 then
+            system.print(string.format("Duplicate container mapping: %s (%d)", containerId, count))
         end
     end
 end

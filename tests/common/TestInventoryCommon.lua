@@ -7,7 +7,6 @@ package.path = package.path .. ";../game-data-lua/?.lua" -- add fallback for dkj
 local lu = require("luaunit")
 local json = require("dkjson")
 
-
 local mockDatabankUnit = require("dumocks.DatabankUnit")
 
 local ic = require("common.InventoryCommon")
@@ -67,6 +66,7 @@ function _G.TestInventoryCommon.testIntListToJson()
     lu.assertEquals(actual, expected)
 end
 
+--- Ensures removing a container id from the db works in all cases.
 function _G.TestInventoryCommon.testRemoveContainerFromDb()
     local databankMock = mockDatabankUnit:new(nil, 1)
     local databank = databankMock:mockGetClosure()
@@ -75,10 +75,6 @@ function _G.TestInventoryCommon.testRemoveContainerFromDb()
     local resourceKeys = {}
     for i, resource in pairs(resources) do
         resourceKeys[i] = resource .. ic.constants.CONTAINER_SUFFIX
-    end
-
-    local function setValue(resourceId, containerString)
-        local key = resources[resourceId] .. ic.constants.CONTAINER_SUFFIX
     end
 
     local containerId, expected, actual
@@ -104,6 +100,17 @@ function _G.TestInventoryCommon.testRemoveContainerFromDb()
     containerId = 2
     databankMock.data = {
         [resourceKeys[1]] = "[2]"
+    }
+    expected = {
+        [resourceKeys[1]] = "[]"
+    }
+    ic.removeContainerFromDb(databank, containerId)
+    lu.assertEquals(databankMock.data, expected)
+
+    -- key repeated alone
+    containerId = 2
+    databankMock.data = {
+        [resourceKeys[1]] = "[2,2]"
     }
     expected = {
         [resourceKeys[1]] = "[]"
@@ -142,6 +149,57 @@ function _G.TestInventoryCommon.testRemoveContainerFromDb()
     }
     ic.removeContainerFromDb(databank, containerId)
     lu.assertEquals(databankMock.data, expected)
+end
+
+--- Verifies validateDb catches known problems.
+function _G.TestInventoryCommon.testValidateDb()
+    local databankMock = mockDatabankUnit:new(nil, 1)
+    local databank = databankMock:mockGetClosure()
+
+    local systemPrint = ""
+    _G.system = {}
+    function system.print(msg)
+        systemPrint = systemPrint .. msg .. "\n"
+    end
+
+    -- duplicate keys
+    local hackedDatabank = {
+        getStringValue = databank.getStringValue
+    }
+    function hackedDatabank.getKeys()
+        local keysList = {}
+        for key,_ in pairs(databankMock.data) do
+            for i = 1, databankMock.data[key] do
+                keysList[#keysList + 1] = string.format([["%s"]], key)
+            end
+        end
+        return "[" .. table.concat(keysList, ",") .. "]"
+    end
+
+    systemPrint = ""
+    databankMock.data = {
+        key1 = 1,
+        key2 = 2
+    }
+    ic.validateDb(hackedDatabank)
+    lu.assertStrMatches(systemPrint, "Duplicate key: key2 %(2%)[%c]*")
+
+    -- duplicate containers on different keys
+    systemPrint = ""
+    databankMock.data = {
+        ["key1.c"] = "[1,2]",
+        ["key2.c"] = "[2]"
+    }
+    ic.validateDb(databank)
+    lu.assertStrMatches(systemPrint, "Duplicate container mapping: 2 %(2%)[%c]*")
+
+    -- duplicate containers on same keys
+    systemPrint = ""
+    databankMock.data = {
+        ["key3.c"] = "[3,3,3]",
+    }
+    ic.validateDb(databank)
+    lu.assertStrMatches(systemPrint, "Duplicate container mapping: 3 %(3%)[%c]*")
 end
 
 os.exit(lu.LuaUnit.run())

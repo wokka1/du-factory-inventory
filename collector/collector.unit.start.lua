@@ -1,13 +1,19 @@
 local waitTime = 30 --export: Time between container scans.
 
--- slot definitions
+-- localize global lookups
 local slots = {}
-slots.databank = databank -- if not found by name will autodetect
 slots.containers = {}
+local Utilities = _G.Utilities
+local InventoryCommon = _G.InventoryCommon
+
+-- if not found by name will autodetect
+slots.screen = screen
+slots.databank = databank
 
 -- link missing slot inputs / validate provided slots
 local module = "inventory-report-scanner"
-slots.databank = _G.Utilities.loadSlot(slots.databank, "DataBankUnit", nil, module, "databank")
+slots.screen = _G.Utilities.loadSlot(slots.screen, "ScreenUnit", nil, module, "screen", true)
+slots.databank = _G.Utilities.loadSlot(slots.databank, "DataBankUnit", slots.screen, module, "databank")
 
 local nextContainer = nil
 local name
@@ -40,12 +46,15 @@ local function processContainer(container)
     local selfMass = container.getSelfMass()
     local maxVolume = container.getMaxVolume()
 
+    InventoryCommon.removeContainerFromDb(slots.databank, id)
+
     local name, quantity, unitMass, unitVolume, isMaterial
     for _, item in pairs(itemsList) do
         if name then
             system.print(
                 string.format("Error: Multiple item types in container id %d: %s, %s, ...", id, name, item.name));
-            return
+                containerStatus[container].complete = true
+                return
         else
             name = string.lower(item.name)
             quantity = item.quantity
@@ -56,10 +65,9 @@ local function processContainer(container)
     end
     if not name then
         system.print(string.format("Error: No items in container id %d", id));
+        containerStatus[container].complete = true
         return
     end
-
-    _G.InventoryCommon.removeContainerFromDb(slots.databank, id)
 
     -- itemName -> unitMass, unitVolume, isMaterial
     -- itemName.containers -> [id, id, id, ...]
@@ -73,14 +81,14 @@ local function processContainer(container)
     local itemString = json.encode(itemDetails)
     slots.databank.setStringValue(name, itemString)
 
-    local itemContainersKey = name .. _G.InventoryCommon.constants.CONTAINER_SUFFIX
-    local currentContainers = _G.InventoryCommon.jsonToIntList(slots.databank.getStringValue(itemContainersKey))
+    local itemContainersKey = name .. InventoryCommon.constants.CONTAINER_SUFFIX
+    local currentContainers = InventoryCommon.jsonToIntList(slots.databank.getStringValue(itemContainersKey))
     table.insert(currentContainers, id)
-    slots.databank.setStringValue(itemContainersKey, _G.InventoryCommon.intListToJson(currentContainers))
+    slots.databank.setStringValue(itemContainersKey, InventoryCommon.intListToJson(currentContainers))
 
     local density = container.getItemsMass() / quantity
     local containerOptimization = density / unitMass
-    local containerKey = _G.InventoryCommon.constants.CONTAINER_PREFIX .. id
+    local containerKey = InventoryCommon.constants.CONTAINER_PREFIX .. id
     local containerDetails = {
         selfMass = selfMass,
         maxVolume = maxVolume,
@@ -115,6 +123,7 @@ function _G.updateTick()
 
     if not incomplete then
         system.print("All containers complete, ending from timer.")
+        InventoryCommon.validateDb(slots.databank)
         unit.exit()
     end
 end
