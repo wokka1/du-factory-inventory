@@ -53,8 +53,8 @@ local function processContainer(container)
         if name then
             system.print(
                 string.format("Error: Multiple item types in container id %d: %s, %s, ...", id, name, item.name));
-                containerStatus[container].complete = true
-                return
+            containerStatus[container].complete = true
+            return
         else
             name = string.lower(item.name)
             quantity = item.quantity

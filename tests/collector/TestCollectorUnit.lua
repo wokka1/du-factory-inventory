@@ -1,6 +1,6 @@
 #!/usr/bin/env lua
-
 --- Tests for collector unit.start.
+
 package.path = package.path .. ";../du-mocks/?.lua" -- add du-mocks project
 package.path = package.path .. ";../du-utils/?.lua" -- add du-utils project
 package.path = package.path .. ";../game-data-lua/?.lua" -- add fallback for dkjson
@@ -96,6 +96,33 @@ function _G.TestCollectorUnit:testNothingToScan()
     lu.assertErrorMsgContains("Missing containers", unitStart)
 end
 
+--- Verify results of a container scan on expected types of contents: empty.
+function _G.TestCollectorUnit:testProcessContainerEmpty()
+    -- initialize, map databank and container, clear auto-map output
+    _G.unit = self.unit
+    unitStart()
+    self.printOutput = ""
+
+    local function callbackFunction()
+        _G.storageAcquired("container1")
+    end
+    self.containerMock1:mockRegisterStorageAcquired(callbackFunction)
+
+    -- no contents
+    self.containerMock1.storageJson = "{}"
+
+    lu.assertTrue(self.containerMock1.storageRequested, "Should have requested storage on initial unit.start run.")
+    self.containerMock1:mockDoStorageAcquired()
+
+    -- intended container finished
+    lu.assertStrIContains(self.printOutput, "Error: No items in container id " .. self.container1.getId())
+    -- scan completed
+    lu.assertStrIContains(self.printOutput, "All containers complete,")
+
+    -- verify (lack of) result in databank
+    lu.assertEquals(self.databankMock.data, {})
+end
+
 --- Verify results of a container scan on expected types of contents: material.
 -- Base case: no database preload, no container optimization.
 function _G.TestCollectorUnit:testProcessContainerMaterial()
@@ -104,9 +131,8 @@ function _G.TestCollectorUnit:testProcessContainerMaterial()
     unitStart()
     self.printOutput = ""
 
-    local containerSlotName = "container1"
     local function callbackFunction()
-        _G.storageAcquired(containerSlotName)
+        _G.storageAcquired("container1")
     end
     self.containerMock1:mockRegisterStorageAcquired(callbackFunction)
 
@@ -168,9 +194,8 @@ function _G.TestCollectorUnit:testProcessContainerPart()
     unitStart()
     self.printOutput = ""
 
-    local containerSlotName = "container1"
     local function callbackFunction()
-        _G.storageAcquired(containerSlotName)
+        _G.storageAcquired("container1")
     end
     self.containerMock1:mockRegisterStorageAcquired(callbackFunction)
 
@@ -236,9 +261,8 @@ function _G.TestCollectorUnit:testContainerMultipleItems()
     local screwKey = "uncommon screw" .. ic.constants.CONTAINER_SUFFIX
     self.databankMock.data[screwKey] = "[" .. self.container1.getId() .. "]"
 
-    local containerSlotName = "container1"
     local function callbackFunction()
-        _G.storageAcquired(containerSlotName)
+        _G.storageAcquired("container1")
     end
     self.containerMock1:mockRegisterStorageAcquired(callbackFunction)
 
@@ -287,9 +311,8 @@ function _G.TestCollectorUnit:testProcessContainerRemap()
     local screwKey = "uncommon screw" .. ic.constants.CONTAINER_SUFFIX
     self.databankMock.data[screwKey] = "[" .. self.container1.getId() .. "]"
 
-    local containerSlotName = "container1"
     local function callbackFunction()
-        _G.storageAcquired(containerSlotName)
+        _G.storageAcquired("container1")
     end
     self.containerMock1:mockRegisterStorageAcquired(callbackFunction)
 
@@ -326,6 +349,72 @@ function _G.TestCollectorUnit:testProcessContainerRemap()
 
     -- databank cleared existing container mapping
     lu.assertEquals(self.databankMock.data[screwKey], "[]")
+end
+
+--- Verify sequence of requesting and processing containers.
+function _G.TestCollectorUnit:testProcessContainerMultiple()
+    -- add second container
+    self.containerMock2 = mockContainerUnit:new(nil, 4)
+    self.container2 = self.containerMock2:mockGetClosure()
+
+    self.unitMock.linkedElements["container2"] = self.container2
+    self.unit = self.unitMock:mockGetClosure()
+
+    -- initialize, map databank and container, clear auto-map output
+    _G.unit = self.unit
+    unitStart()
+    self.printOutput = ""
+
+    local function callbackFunction1()
+        _G.storageAcquired("container1")
+    end
+    self.containerMock1:mockRegisterStorageAcquired(callbackFunction1)
+    local function callbackFunction2()
+        _G.storageAcquired("container2")
+    end
+    self.containerMock2:mockRegisterStorageAcquired(callbackFunction2)
+
+    -- don't need contents
+    self.containerMock1.storageJson = "{}"
+    self.containerMock2.storageJson = "{}"
+
+    lu.assertTrue(self.containerMock1.storageRequested ~= self.containerMock2.storageRequested,
+        "Should have requested storage on exactly one container.")
+
+    -- determine first requested container and provide storage
+    local firstContainer, firstContainerMock
+    if self.containerMock1.storageRequested then
+        firstContainer = self.container1
+        firstContainerMock = self.containerMock1
+    else
+        firstContainer = self.container2
+        firstContainerMock = self.containerMock2
+    end
+    firstContainerMock:mockDoStorageAcquired()
+
+    -- first container finished
+    lu.assertStrIContains(self.printOutput, "Error: No items in container id " .. firstContainer.getId())
+
+    lu.assertTrue(self.containerMock1.storageRequested == self.containerMock2.storageRequested and
+                      self.containerMock1.storageRequested == true, "Both containers should have been requested now.")
+
+    -- clear output and provide second container
+    self.printOutput = ""
+    local secondContainer, secondContainerMock
+    if self.containerMock1 == firstContainerMock then
+        secondContainer = self.container2
+        secondContainerMock = self.containerMock2
+    else
+        secondContainer = self.container1
+        secondContainerMock = self.containerMock1
+    end
+    secondContainerMock:mockDoStorageAcquired()
+
+    -- second container finished
+    lu.assertStrIContains(self.printOutput, "Error: No items in container id " .. secondContainer.getId())
+
+    -- scan completed
+    lu.assertStrIContains(self.printOutput, "All containers complete,")
 end
 
 os.exit(lu.LuaUnit.run())
