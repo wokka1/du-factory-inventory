@@ -200,6 +200,15 @@ function _G.TestInventoryCommon.testValidateDb()
     }
     ic.validateDb(databank)
     lu.assertStrMatches(systemPrint, "Duplicate container mapping: 3 %(3%)[%c]*")
+
+    -- no warning based on item data
+    systemPrint = ""
+    databankMock.data = {
+        ["basic chemical industry m"] = [[{"unitMass":2302.34,"unitVolume":479.2,"isMaterial":false}]],
+        ["basic refiner m"] = [[{"unitMass":2302.34,"unitVolume":479.2,"isMaterial":false}]]
+    }
+    ic.validateDb(databank)
+    lu.assertEquals(systemPrint, "")
 end
 
 os.exit(lu.LuaUnit.run())
