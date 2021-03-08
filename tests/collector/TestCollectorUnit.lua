@@ -109,7 +109,7 @@ function _G.TestCollectorUnit:testProcessContainerEmpty()
     self.containerMock1:mockRegisterStorageAcquired(callbackFunction)
 
     -- no contents
-    self.containerMock1.storageJson = "{}"
+    self.containerMock1.storageJson = "[]"
 
     lu.assertTrue(self.containerMock1.storageRequested, "Should have requested storage on initial unit.start run.")
     self.containerMock1:mockDoStorageAcquired()
@@ -143,7 +143,7 @@ function _G.TestCollectorUnit:testProcessContainerMaterial()
     local itemName = "Pure Oxygen"
     local itemJson = string.format(mockContainerUnit.JSON_ITEM_TEMPLATE, "OxygenPure", itemName,
                          self.containerMock1.itemsVolume, "material", density, 1.0)
-    self.containerMock1.storageJson = "{" .. itemJson .. "}"
+    self.containerMock1.storageJson = "[" .. itemJson .. "]"
 
     lu.assertTrue(self.containerMock1.storageRequested, "Should have requested storage on initial unit.start run.")
     self.containerMock1:mockDoStorageAcquired()
@@ -207,7 +207,7 @@ function _G.TestCollectorUnit:testProcessContainerPart()
     local itemName = "Basic Hydraulics"
     local itemJson = string.format(mockContainerUnit.JSON_ITEM_TEMPLATE, "hydraulics_1", itemName,
                          self.containerMock1.itemsVolume, "part", unitMass, unitVolume)
-    self.containerMock1.storageJson = "{" .. itemJson .. "}"
+    self.containerMock1.storageJson = "[" .. itemJson .. "]"
 
     lu.assertTrue(self.containerMock1.storageRequested, "Should have requested storage on initial unit.start run.")
     self.containerMock1:mockDoStorageAcquired()
@@ -280,7 +280,7 @@ function _G.TestCollectorUnit:testContainerMultipleItems()
     local xeronJson = string.format(mockContainerUnit.JSON_ITEM_TEMPLATE, "Xeron", item2Name,
                           self.containerMock1.itemsVolume, "material", density, 1.0)
 
-    self.containerMock1.storageJson = "{" .. oxygenJson .. "," .. xeronJson .. "}"
+    self.containerMock1.storageJson = "[" .. oxygenJson .. "," .. xeronJson .. "]"
 
     lu.assertTrue(self.containerMock1.storageRequested, "Should have requested storage on initial unit.start run.")
     self.containerMock1:mockDoStorageAcquired()
@@ -324,7 +324,7 @@ function _G.TestCollectorUnit:testProcessContainerRemap()
     local oxygenKey = itemName:lower() .. ic.constants.CONTAINER_SUFFIX
     local itemJson = string.format(mockContainerUnit.JSON_ITEM_TEMPLATE, "OxygenPure", itemName,
                          self.containerMock1.itemsVolume, "material", density, 1.0)
-    self.containerMock1.storageJson = "{" .. itemJson .. "}"
+    self.containerMock1.storageJson = "[" .. itemJson .. "]"
 
     -- preload databank with extra container id for new item
     self.databankMock.data[oxygenKey] = "[" .. 100 .. "]"
@@ -375,8 +375,8 @@ function _G.TestCollectorUnit:testProcessContainerMultiple()
     self.containerMock2:mockRegisterStorageAcquired(callbackFunction2)
 
     -- don't need contents
-    self.containerMock1.storageJson = "{}"
-    self.containerMock2.storageJson = "{}"
+    self.containerMock1.storageJson = "[]"
+    self.containerMock2.storageJson = "[]"
 
     lu.assertTrue(self.containerMock1.storageRequested ~= self.containerMock2.storageRequested,
         "Should have requested storage on exactly one container.")

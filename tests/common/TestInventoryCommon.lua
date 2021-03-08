@@ -149,6 +149,27 @@ function _G.TestInventoryCommon.testRemoveContainerFromDb()
     }
     ic.removeContainerFromDb(databank, containerId)
     lu.assertEquals(databankMock.data, expected)
+
+    -- failing case from live testing
+    containerId = 567
+    databankMock.data = {
+        ["basic fixation"] = [[{"unitMass":1.12,"unitVolume":1.0,"isMaterial":false}]],
+        ["basic fixation.c"] = "[175]",
+        ["c.175"] = [[{"maxVolume":1200.0,"optimization":1.0,"selfMass":229.09}]],
+        ["advanced screw"] = [[{"unitMass":8.14,"unitVolume":1.0,"isMaterial":false}]],
+        ["advanced screw.c"] = "[567]",
+        ["c.567"] = [[{"maxVolume":1200.0,"optimization":1.0,"selfMass":229.09}]]
+    }
+    expected = {
+        ["basic fixation"] = [[{"unitMass":1.12,"unitVolume":1.0,"isMaterial":false}]],
+        ["basic fixation.c"] = "[175]",
+        ["c.175"] = [[{"maxVolume":1200.0,"optimization":1.0,"selfMass":229.09}]],
+        ["advanced screw"] = [[{"unitMass":8.14,"unitVolume":1.0,"isMaterial":false}]],
+        ["advanced screw.c"] = "[]",
+        ["c.567"] = [[{"maxVolume":1200.0,"optimization":1.0,"selfMass":229.09}]]
+    }
+    ic.removeContainerFromDb(databank, containerId)
+    lu.assertEquals(databankMock.data, expected)
 end
 
 --- Verifies validateDb catches known problems.

@@ -31,7 +31,7 @@ function _G.InventoryCommon.intListToJson(list)
     return string.format("[%s]", table.concat(list, ","))
 end
 
-local CONTAINERS_DB_PATTERN = string.format([["(.-%%%s)"]], constants.CONTAINER_SUFFIX) -- escape . in suffix
+local CONTAINERS_DB_PATTERN = string.format([["([^"]+%%%s)"]], constants.CONTAINER_SUFFIX) -- escape . in suffix
 --- Strips the provided container id out of any items that have it listed.
 function _G.InventoryCommon.removeContainerFromDb(databank, containerId)
     local allKeys = databank.getKeys()
