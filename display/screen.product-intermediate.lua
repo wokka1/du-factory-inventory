@@ -1,4 +1,4 @@
-local productIntermediateConfig = {
+local screenConfig = {
     vertical = true,
     titleFontSize = 75,
     titleHeight = 100,
@@ -12,7 +12,7 @@ local productIntermediateConfig = {
     columns = 2,
     tables = {}
 }
-productIntermediateConfig.tables[#productIntermediateConfig.tables + 1] = {
+screenConfig.tables[#screenConfig.tables + 1] = {
     title = "Product",
     columns = {"Heavy Metal"},
     rows = {
@@ -23,17 +23,17 @@ productIntermediateConfig.tables[#productIntermediateConfig.tables + 1] = {
         {{name = "Mangalolly Product", label = "Mangalloy"}},
     }
 }
-productIntermediateConfig.tables[#productIntermediateConfig.tables + 1] = {
+screenConfig.tables[#screenConfig.tables + 1] = {
     title = "Intermediate",
     columns = {"Screw"},
     countOffset = 100,
     rows = {
-        {{name = "Basic Screw", label=""}},
-        {{name = "Uncommon Screw", label=""}},
-        {{name = "Advanced Screw", label=""}},
+        {{name = "Basic Screw", label="", targetCount = 1200}},
+        {{name = "Uncommon Screw", label="", targetCount = 800}},
+        {{name = "Advanced Screw", label="", targetCount = 400}},
     }
 }
-productIntermediateConfig.tables[#productIntermediateConfig.tables + 1] = {
+screenConfig.tables[#screenConfig.tables + 1] = {
     columns = {"Light Metal"},
     rows = {
         {{name = "Silumin Product", label = "Silumin"}},
@@ -43,7 +43,7 @@ productIntermediateConfig.tables[#productIntermediateConfig.tables + 1] = {
         {{name = "Grade 5 Titanium Alloy Product", label = "G5 Titanium"}},
     }
 }
-productIntermediateConfig.tables[#productIntermediateConfig.tables + 1] = {
+screenConfig.tables[#screenConfig.tables + 1] = {
     columns = {"Pipe"},
     countOffset = 100,
     rows = {
@@ -52,7 +52,7 @@ productIntermediateConfig.tables[#productIntermediateConfig.tables + 1] = {
         {{name = "Advanced Pipe", label=""}},
     }
 }
-productIntermediateConfig.tables[#productIntermediateConfig.tables + 1] = {
+screenConfig.tables[#screenConfig.tables + 1] = {
     columns = {"Conductor"},
     rows = {
         {{name = "Al-Fe Alloy Product", label = "Al-Fe Alloy"}},
@@ -62,7 +62,7 @@ productIntermediateConfig.tables[#productIntermediateConfig.tables + 1] = {
         {{name = "Ti-Nb Supraconductor Product", label = "Ti-Nb Spr."}},
     }
 }
-productIntermediateConfig.tables[#productIntermediateConfig.tables + 1] = {
+screenConfig.tables[#screenConfig.tables + 1] = {
     columns = {"Component", "Connector"},
     countOffset = 100,
     rows = {
@@ -71,7 +71,7 @@ productIntermediateConfig.tables[#productIntermediateConfig.tables + 1] = {
         {{name = "Advanced Component", label=""}, {name = "Advanced Connector", label=""}},
     }
 }
-productIntermediateConfig.tables[#productIntermediateConfig.tables + 1] = {
+screenConfig.tables[#screenConfig.tables + 1] = {
     columns = {"Polymer"},
     rows = {
         {{name = "Polycarbonate Plastic Product", label = "Polycarb"}},
@@ -81,7 +81,7 @@ productIntermediateConfig.tables[#productIntermediateConfig.tables + 1] = {
         {{name = "Vanamer Product", label = "Vanamer"}},
     }
 }
-productIntermediateConfig.tables[#productIntermediateConfig.tables + 1] = {
+screenConfig.tables[#screenConfig.tables + 1] = {
     columns = {"Fixation"},
     countOffset = 100,
     rows = {
@@ -90,7 +90,7 @@ productIntermediateConfig.tables[#productIntermediateConfig.tables + 1] = {
         {{name = "Advanced Fixation", label=""}},
     }
 }
-productIntermediateConfig.tables[#productIntermediateConfig.tables + 1] = {
+screenConfig.tables[#screenConfig.tables + 1] = {
     columns = {"Glass"},
     rows = {
         {{name = "Glass Product", label = "Glass"}},
@@ -100,7 +100,7 @@ productIntermediateConfig.tables[#productIntermediateConfig.tables + 1] = {
         {{name = "Manganese Reinforced Glass Product", label = "Manganese"}},
     }
 }
-productIntermediateConfig.tables[#productIntermediateConfig.tables + 1] = {
+screenConfig.tables[#screenConfig.tables + 1] = {
     columns = {"LED"},
     countOffset = 100,
     rows = {
@@ -116,4 +116,4 @@ if not _G.displays then
 end
 
 -- must link by slot name
-_G.displays[${slotName}] = productIntermediateConfig
+_G.displays[${slotName}] = screenConfig

@@ -62,13 +62,13 @@ text.blockTitle {
 .full .label {
     fill: #333;
 }
-.fillHigh, .fillHigh text {
+.fillGreen, .fillGreen text {
     fill: green;
 }
-.fillMed, .fillMed text {
+.fillYellow, .fillYellow text {
     fill: yellow;
 }
-.fillLow, .fillLow text {
+.fillRed, .fillRed text {
     fill: red;
 }
 rect.headerRule {
@@ -128,9 +128,8 @@ local function generateRowCell(item, itemData, xStart, yStart, width, height, co
             count = slots.containers[itemName].getItemsVolume()
             maxCount = slots.containers[itemName].getMaxVolume()
             countError = false
-            system.print("volume slot: " .. count)
         else
-            system.print("Container not found for " .. itemName)
+            system.print("Container link not found for " .. itemName)
             countError = true
         end
     elseif item.source == InventoryCommon.constants.SOURCE_CORE_CONTAINER or (not item.source and itemResults.containerData) then
@@ -140,24 +139,28 @@ local function generateRowCell(item, itemData, xStart, yStart, width, height, co
         countError = itemResults.containerError
     end
 
+    if item.targetCount then
+        maxCount = item.targetCount
+    end
+
     local percent = count / maxCount
 
     local barColor
     if reverse then
         if percent > 0.9 then
-            barColor = "fillLow"
+            barColor = "fillRed"
         elseif percent > 0.5 then
-            barColor = "fillMed"
+            barColor = "fillYellow"
         else
-            barColor = "fillHigh"
+            barColor = "fillGreen"
         end
     else
         if percent > 0.5 then
-            barColor = "fillHigh"
+            barColor = "fillGreen"
         elseif percent > 0.1 then
-            barColor = "fillMed"
+            barColor = "fillYellow"
         else
-            barColor = "fillLow"
+            barColor = "fillRed"
         end
     end
 
@@ -382,7 +385,7 @@ local function updateData()
 
         for _, containerId in pairs(containerIdList) do
             -- remove container ids that aren't in core.getElementIdList
-            if slots.core.getElementTypeById() == "" then
+            if slots.core.getElementTypeById(containerId) == "" then
                 InventoryCommon.removeContainerFromDb(slots.databank, containerId)
                 system.print(string.format("Container %d not found in core lookup, removing from databank...", containerId))
                 goto continueContainerId

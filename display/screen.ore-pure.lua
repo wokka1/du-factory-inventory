@@ -1,4 +1,4 @@
-local orePureConfig = {
+local screenConfig = {
     vertical = true,
     titleFontSize = 75,
     titleHeight = 100,
@@ -13,17 +13,17 @@ local orePureConfig = {
     colspan = 2,
     tables = {}
 }
-orePureConfig.tables[#orePureConfig.tables + 1] = {
+screenConfig.tables[#screenConfig.tables + 1] = {
     title = "Ore",
     colspan = 1,
     rows = {}
 }
-orePureConfig.tables[#orePureConfig.tables + 1] = {
+screenConfig.tables[#screenConfig.tables + 1] = {
     title = "Pure",
     colspan = 1,
     rows = {}
 }
-orePureConfig.tables[#orePureConfig.tables + 1] = {
+screenConfig.tables[#screenConfig.tables + 1] = {
     columns = {"Tier 1", ""},
     rows = {
         {"Bauxite", {name = "Pure Aluminium", label = "Aluminium"}},
@@ -32,7 +32,7 @@ orePureConfig.tables[#orePureConfig.tables + 1] = {
         {"Quartz", {name = "Pure Silicon", label = "Silicon"}},
     }
 }
-orePureConfig.tables[#orePureConfig.tables + 1] = {
+screenConfig.tables[#screenConfig.tables + 1] = {
     columns = {"Tier 2", ""},
     rows = {
         {"Limestone", {name = "Pure Calcium", label = "Calcium"}},
@@ -41,7 +41,7 @@ orePureConfig.tables[#orePureConfig.tables + 1] = {
         {"Natron", {name = "Pure Sodium", label = "Sodium"}},
     }
 }
-orePureConfig.tables[#orePureConfig.tables + 1] = {
+screenConfig.tables[#screenConfig.tables + 1] = {
     columns = {"Tier 3", ""},
     rows = {
         {"Petalite", {name = "Pure Lithium", label = "Lithium"}},
@@ -50,7 +50,7 @@ orePureConfig.tables[#orePureConfig.tables + 1] = {
         {"Pyrite", {name = "Pure Sulfur", label = "Sulfur"}},
     }
 }
-orePureConfig.tables[#orePureConfig.tables + 1] = {
+screenConfig.tables[#screenConfig.tables + 1] = {
     columns = {"Tier 4", ""},
     rows = {
         {"Cobaltite", {name = "Pure Cobalt", label = "Cobalt"}},
@@ -59,7 +59,7 @@ orePureConfig.tables[#orePureConfig.tables + 1] = {
         {"Kolbeckite", {name = "Scandium Pure", label = "Scandium"}},
     }
 }
-orePureConfig.tables[#orePureConfig.tables + 1] = {
+screenConfig.tables[#screenConfig.tables + 1] = {
     columns = {"Tier 5", ""},
     rows = {
         {"Columbite", {name = "Niobium Pure", label = "Niobium"}},
@@ -68,7 +68,7 @@ orePureConfig.tables[#orePureConfig.tables + 1] = {
         {"Vanadinite", {name = "Vanadium Pure", label = "Vanadium"}},
     }
 }
-orePureConfig.tables[#orePureConfig.tables + 1] = {
+screenConfig.tables[#screenConfig.tables + 1] = {
     colspan = 1,
     columns = {"Gasses"},
     reverse = true,
@@ -77,7 +77,7 @@ orePureConfig.tables[#orePureConfig.tables + 1] = {
         {{name = "Pure Oxygen", label = "Oxygen"}},
     }
 }
-orePureConfig.tables[#orePureConfig.tables + 1] = {
+screenConfig.tables[#screenConfig.tables + 1] = {
     colspan = 1,
     columns = {"Catalyst"},
     rows = {
@@ -86,7 +86,7 @@ orePureConfig.tables[#orePureConfig.tables + 1] = {
         {"Catalyst 5"},
     }
 }
-orePureConfig.tables[#orePureConfig.tables + 1] = {
+screenConfig.tables[#screenConfig.tables + 1] = {
     colspan = 1,
     columns = {"Ore Overflow"},
     countOffset = 100,
@@ -102,4 +102,4 @@ if not _G.displays then
 end
 
 -- must link by slot name
-_G.displays[${slotName}] = orePureConfig
+_G.displays[${slotName}] = screenConfig
