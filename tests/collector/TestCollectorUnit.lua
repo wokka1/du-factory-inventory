@@ -149,7 +149,7 @@ function _G.TestCollectorUnit:testProcessContainerMaterial()
     self.containerMock1:mockDoStorageAcquired()
 
     -- intended container finished
-    lu.assertStrIContains(self.printOutput, "Registered " .. itemName .. " to container id " .. self.container1.getId())
+    lu.assertStrIContains(self.printOutput, "Registered \"" .. itemName .. "\" to container id: " .. self.container1.getId())
     -- scan completed
     lu.assertStrIContains(self.printOutput, "All containers complete,")
 
@@ -213,7 +213,7 @@ function _G.TestCollectorUnit:testProcessContainerPart()
     self.containerMock1:mockDoStorageAcquired()
 
     -- intended container finished
-    lu.assertStrIContains(self.printOutput, "Registered " .. itemName .. " to container id " .. self.container1.getId())
+    lu.assertStrIContains(self.printOutput, "Registered \"" .. itemName .. "\" to container id: " .. self.container1.getId())
     -- scan completed
     lu.assertStrIContains(self.printOutput, "All containers complete,")
 
@@ -333,7 +333,7 @@ function _G.TestCollectorUnit:testProcessContainerRemap()
     self.containerMock1:mockDoStorageAcquired()
 
     -- intended container finished
-    lu.assertStrIContains(self.printOutput, "Registered " .. itemName .. " to container id " .. self.container1.getId())
+    lu.assertStrIContains(self.printOutput, "Registered \"" .. itemName .. "\" to container id: " .. self.container1.getId())
     -- scan completed
     lu.assertStrIContains(self.printOutput, "All containers complete,")
 

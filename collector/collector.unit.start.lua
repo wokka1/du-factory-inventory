@@ -1,3 +1,10 @@
+---------------------------------------
+-- Factory Inventory: Data Collector --
+--        By W3asel (1337joe)        --
+---------------------------------------
+-- Bundled: ${date}
+-- Latest version always available here: https://du.w3asel.com/du-factory-inventory
+
 local waitTime = 30 --export: Time between container scans.
 
 -- localize global lookups
@@ -97,7 +104,7 @@ local function processContainer(container)
     local containerString = json.encode(containerDetails)
     slots.databank.setStringValue(containerKey, containerString)
 
-    system.print(string.format("Registered %s to container id %d.", name, id))
+    system.print(string.format("Registered \"%s\" to container id: %d", name, id))
 
     containerStatus[container].complete = true
 end
@@ -124,6 +131,7 @@ function _G.updateTick()
     if not incomplete then
         system.print("All containers complete, ending from timer.")
         InventoryCommon.validateDb(slots.databank)
+        -- _G.Datastore.dumpDb(slots.databank, slots.screen)
         unit.exit()
     end
 end

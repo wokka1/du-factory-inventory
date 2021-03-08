@@ -1,3 +1,10 @@
+----------------------------------------
+-- Factory Inventory: Display Manager --
+--        By W3asel (1337joe)         --
+----------------------------------------
+-- Bundled: ${date}
+-- Latest version always available here: https://du.w3asel.com/du-factory-inventory
+
 -- exported variables
 local elementsReadPerUpdate = 100 --export: The number of elements to process for data collection before the coroutine sleeps.
 local maxMassError = 0.001 -- max error allowed for container lookups
