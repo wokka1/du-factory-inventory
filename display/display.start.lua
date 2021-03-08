@@ -103,7 +103,7 @@ local ROW_TEMPLATE = [[
 </g>
 ]]
 local rowClassIndex = 0
-local function generateRowCell(item, itemData, xStart, yStart, width, height, countOffset, reverse)
+local function generateRowCell(item, itemConfig, itemData, xStart, yStart, width, height, countOffset)
     rowClassIndex = rowClassIndex + 1
 
     local itemName, itemLabel
@@ -122,7 +122,7 @@ local function generateRowCell(item, itemData, xStart, yStart, width, height, co
     local countError = false
 
     -- determine data source based on configuration, fall back to first available data if not specified
-    if item.source == InventoryCommon.constants.SOURCE_CONTAINER_VOLUME_ONLY then
+    if itemConfig.source == InventoryCommon.constants.SOURCE_CONTAINER_VOLUME_ONLY then
         if slots.containers and slots.containers[itemName] and slots.containers[itemName].getItemsVolume then
             units = "L"
             count = slots.containers[itemName].getItemsVolume()
@@ -132,21 +132,21 @@ local function generateRowCell(item, itemData, xStart, yStart, width, height, co
             system.print("Container link not found for " .. itemName)
             countError = true
         end
-    elseif item.source == InventoryCommon.constants.SOURCE_CORE_CONTAINER or (not item.source and itemResults.containerData) then
+    elseif itemConfig.source == InventoryCommon.constants.SOURCE_CORE_CONTAINER or (not itemConfig.source and itemResults.containerData) then
         units = itemResults.units
         count = itemResults.containerItems
         maxCount = itemResults.containerMaxItems
         countError = itemResults.containerError
     end
 
-    if item.targetCount then
-        maxCount = item.targetCount
+    if itemConfig.targetCount then
+        maxCount = itemConfig.targetCount
     end
 
     local percent = count / maxCount
 
     local barColor
-    if reverse then
+    if itemConfig.reverse then
         if percent > 0.9 then
             barColor = "fillRed"
         elseif percent > 0.5 then
@@ -243,7 +243,7 @@ local function generateTable(table, tableConfig, xOffset, yOffset, width, itemDa
             local itemConfig = inheritConfig(rowConfig, item)
 
             local rowX = xOffset + column * (columnWidth + columnXPadding)
-            document = document .. generateRowCell(item, itemData, rowX, yOffset, columnWidth, rowHeight, tableConfig.countOffset, itemConfig.reverse)
+            document = document .. generateRowCell(item, itemConfig, itemData, rowX, yOffset, columnWidth, rowHeight, tableConfig.countOffset)
 
             column = column + 1
         end

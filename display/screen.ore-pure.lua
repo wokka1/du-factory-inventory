@@ -87,7 +87,7 @@ screenConfig.tables[#screenConfig.tables + 1] = {
     }
 }
 screenConfig.tables[#screenConfig.tables + 1] = {
-    colspan = 1,
+    colspan = 2,
     columns = {"Ore Overflow"},
     countOffset = 100,
     reverse = true,
