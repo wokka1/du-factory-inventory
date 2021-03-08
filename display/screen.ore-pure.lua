@@ -69,9 +69,8 @@ orePureConfig.tables[#orePureConfig.tables + 1] = {
     }
 }
 orePureConfig.tables[#orePureConfig.tables + 1] = {
-    title = "Gasses",
     colspan = 1,
-    columns = 1,
+    columns = {"Gasses"},
     reverse = true,
     rows = {
         {{name = "Pure Hydrogen", label = "Hydrogen"}},
@@ -79,13 +78,21 @@ orePureConfig.tables[#orePureConfig.tables + 1] = {
     }
 }
 orePureConfig.tables[#orePureConfig.tables + 1] = {
-    title = "Catalyst",
     colspan = 1,
-    columns = 1,
+    columns = {"Catalyst"},
     rows = {
         {"Catalyst 3"},
         {"Catalyst 4"},
         {"Catalyst 5"},
+    }
+}
+orePureConfig.tables[#orePureConfig.tables + 1] = {
+    colspan = 1,
+    columns = {"Ore Overflow"},
+    countOffset = 100,
+    reverse = true,
+    rows = {
+        {{name = "ore overflow", label = "", source = "container volume"}},
     }
 }
 

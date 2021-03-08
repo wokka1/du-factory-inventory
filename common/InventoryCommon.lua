@@ -8,9 +8,9 @@ _G.InventoryCommon = {}
 
 local constants = {}
 -- Container status will be read from core.
-constants.CORE = "core"
--- Container status will be read from receiver.
-constants.RECEIVER = "receiver"
+constants.SOURCE_CORE_CONTAINER = "core container"
+-- Container status will be read directly from container by volume.
+constants.SOURCE_CONTAINER_VOLUME_ONLY = "container volume"
 -- suffix of item container keys, format "<item name>.c"
 constants.CONTAINER_SUFFIX = ".c"
 -- prefix for container metadata keys, format "c.<id>"

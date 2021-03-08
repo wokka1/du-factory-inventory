@@ -5,6 +5,7 @@ local maxMassError = 0.001 -- max error allowed for container lookups
 -- localize global lookups
 local slots = {}
 slots.displays = _G.displays
+slots.containers = _G.containers
 local Utilities = _G.Utilities
 local InventoryCommon = _G.InventoryCommon
 local json = _G.json
@@ -13,7 +14,6 @@ local math = _G.math
 -- if not found by name will autodetect
 slots.databank = databank
 slots.core = core
-slots.receiver = receiver
 
 -- validate inputs
 local screenIndex = 1
@@ -30,14 +30,12 @@ end
 
 -- link missing slot inputs / validate provided slots
 local module = "inventory-report"
-slots.core = Utilities.loadSlot(slots.core, {"CoreUnitDynamic", "CoreUnitStatic", "CoreUnitSpace"}, nil, module,
-                    "core", true, "No core link found, will default to receiver for data population.")
+slots.core = Utilities.loadSlot(slots.core, {"CoreUnitDynamic", "CoreUnitStatic", "CoreUnitSpace"}, nil, module, "core", false)
 local databankOptionalMsg = nil
 if slots.core then
     databankOptionalMsg = "Databank link not found, required for reading container data from core."
 end
 slots.databank = Utilities.loadSlot(slots.databank, "DataBankUnit", nil, module, "databank", true, databankOptionalMsg)
-slots.receiver = Utilities.loadSlot(slots.receiver, "ReceiverUnit", nil, module, "receiver", slots.core)
 
 -- hide widget
 unit.hide()
@@ -123,8 +121,19 @@ local function generateRowCell(item, itemData, xStart, yStart, width, height, co
     local maxCount = 1
     local countError = false
 
-    local useContainer = itemResults.containerData
-    if useContainer then
+    -- determine data source based on configuration, fall back to first available data if not specified
+    if item.source == InventoryCommon.constants.SOURCE_CONTAINER_VOLUME_ONLY then
+        if slots.containers and slots.containers[itemName] and slots.containers[itemName].getItemsVolume then
+            units = "L"
+            count = slots.containers[itemName].getItemsVolume()
+            maxCount = slots.containers[itemName].getMaxVolume()
+            countError = false
+            system.print("volume slot: " .. count)
+        else
+            system.print("Container not found for " .. itemName)
+            countError = true
+        end
+    elseif item.source == InventoryCommon.constants.SOURCE_CORE_CONTAINER or (not item.source and itemResults.containerData) then
         units = itemResults.units
         count = itemResults.containerItems
         maxCount = itemResults.containerMaxItems
@@ -297,14 +306,6 @@ end
 local function initializeMetadata(firstRun)
     for screen, config in pairs(slots.displays) do
         if firstRun then
-            if not config.source then
-                if slots.core then
-                    config.source = InventoryCommon.constants.CORE
-                elseif slots.receiver then
-                    config.source = InventoryCommon.constants.RECEIVER
-                end
-            end
-
         -- TODO add loading overlay svg screen
         end
 
@@ -335,28 +336,11 @@ function ItemReport:new(o)
 end
 local gatheredItems = {}
 
---- Checks all screens to see if they have finished updating.
-local function checkFinished()
-    local finished = true
-    for screen, config in pairs(slots.displays) do
-        if not config.complete then
-            finished = false
-            break
-        end
-    end
-    return finished
-end
-
 local resumeOnUpdate = true
 local function updateData()
 
     -- determine necessary data
     for slot, config in pairs(slots.displays) do
-        -- skip if not local
-        if config.source ~= InventoryCommon.constants.CORE then
-            goto continue
-        end
-
         for _, table in pairs(config.tables) do
             for _, row in pairs(table.rows) do
                 for _, item in pairs(row) do
@@ -375,86 +359,90 @@ local function updateData()
         ::continue::
     end
 
-    while not checkFinished() do
-
-        -- gather data by databank lookup (containers)
-        local elementsRead = 0
-        for name, data in pairs(gatheredItems) do
-            if not slots.databank then
-                break
-            end
-
-            -- read container data using databank values
-            local containerIdListKey = name .. InventoryCommon.constants.CONTAINER_SUFFIX
-            if not (slots.databank.hasKey(name) == 1 and slots.databank.hasKey(containerIdListKey) == 1) then
-                goto continueContainers
-            end
-
-            -- itemName -> unitMass, unitVolume, isMaterial
-            -- itemName.CONTAINER_SUFFIX -> [id, id, id, ...]
-            -- CONTAINER_PREFIX.containerId -> selfMass, maxVolume, optimization
-
-            local itemDetails = json.decode(slots.databank.getStringValue(name))
-
-            local containerIdList = InventoryCommon.jsonToIntList(slots.databank.getStringValue(containerIdListKey))
-
-            -- TODO remove container ids that aren't in core.getElementIdList
-
-            for _, containerId in pairs(containerIdList) do
-                local containerDetails = json.decode(slots.databank.getStringValue(InventoryCommon.constants.CONTAINER_PREFIX .. containerId))
-
-                local itemMass = (slots.core.getElementMassById(containerId) - containerDetails.selfMass) / containerDetails.optimization
-                local itemCount = itemMass / itemDetails.unitMass
-                local itemUnits
-                local maxItems
-                if itemDetails.isMaterial then
-                    itemUnits = "L"
-                    maxItems = containerDetails.maxVolume
-                else
-                    itemUnits = ""
-                    maxItems = math.floor(containerDetails.maxVolume / itemDetails.unitVolume)
-                end
-
-                data.units = itemUnits
-                data.containerData = true
-                data.containerItems = data.containerItems + itemCount
-                data.containerMaxItems = data.containerMaxItems + maxItems
-                data.containerError = data.containerError or math.abs(itemCount - math.floor(itemCount)) > maxMassError
-
-                elementsRead = elementsRead + 1
-                if elementsRead % elementsReadPerUpdate == 0 then
-                    coroutine.yield()
-                end
-            end
-
-            ::continueContainers::
+    -- gather data by databank lookup (containers)
+    local elementsRead = 0
+    for name, data in pairs(gatheredItems) do
+        if not slots.databank then
+            break
         end
 
-        -- gather data by industry scanning
-        if slots.core then
-            for _, id in pairs(slots.core.getElementIdList()) do
-                -- system.print(id .. ": " .. slots.core.getElementNameById(id) .. ": " .. slots.core.getElementTypeById(id))
-
-                elementsRead = elementsRead + 1
-                if elementsRead % elementsReadPerUpdate == 0 then
-                    coroutine.yield()
-                end
-            end
+        -- read container data using databank values
+        local containerIdListKey = name .. InventoryCommon.constants.CONTAINER_SUFFIX
+        if not (slots.databank.hasKey(name) == 1 and slots.databank.hasKey(containerIdListKey) == 1) then
+            goto continueContainers
         end
 
-        -- update screens
-        for slot, config in pairs(slots.displays) do
-            -- skip if already done
-            if config.finished then
-                goto continue
+        -- itemName -> unitMass, unitVolume, isMaterial
+        -- itemName.CONTAINER_SUFFIX -> [id, id, id, ...]
+        -- CONTAINER_PREFIX.containerId -> selfMass, maxVolume, optimization
+
+        local itemDetails = json.decode(slots.databank.getStringValue(name))
+
+        local containerIdList = InventoryCommon.jsonToIntList(slots.databank.getStringValue(containerIdListKey))
+
+        for _, containerId in pairs(containerIdList) do
+            -- remove container ids that aren't in core.getElementIdList
+            if slots.core.getElementTypeById() == "" then
+                InventoryCommon.removeContainerFromDb(slots.databank, containerId)
+                system.print(string.format("Container %d not found in core lookup, removing from databank...", containerId))
+                goto continueContainerId
             end
 
-            populateScreen(slot, config, gatheredItems)
-            config.complete = true
+            local containerDetails = json.decode(slots.databank.getStringValue(InventoryCommon.constants.CONTAINER_PREFIX .. containerId))
 
-            coroutine.yield()
-            ::continue::
+            local itemMass = (slots.core.getElementMassById(containerId) - containerDetails.selfMass) / containerDetails.optimization
+            local itemCount = itemMass / itemDetails.unitMass
+            local itemUnits
+            local maxItems
+            if itemDetails.isMaterial then
+                itemUnits = "L"
+                maxItems = containerDetails.maxVolume
+            else
+                itemUnits = ""
+                maxItems = math.floor(containerDetails.maxVolume / itemDetails.unitVolume)
+            end
+
+            data.units = itemUnits
+            data.containerData = true
+            data.containerItems = data.containerItems + itemCount
+            data.containerMaxItems = data.containerMaxItems + maxItems
+            data.containerError = data.containerError or math.abs(itemCount - math.floor(itemCount)) > maxMassError
+
+            elementsRead = elementsRead + 1
+            if elementsRead % elementsReadPerUpdate == 0 then
+                coroutine.yield()
+            end
+
+            ::continueContainerId::
         end
+
+        ::continueContainers::
+    end
+
+    -- gather data by industry scanning
+    if slots.core then
+        for _, id in pairs(slots.core.getElementIdList()) do
+            -- system.print(id .. ": " .. slots.core.getElementNameById(id) .. ": " .. slots.core.getElementTypeById(id))
+
+            elementsRead = elementsRead + 1
+            if elementsRead % elementsReadPerUpdate == 0 then
+                coroutine.yield()
+            end
+        end
+    end
+
+    -- update screens
+    for slot, config in pairs(slots.displays) do
+        -- skip if already done
+        if config.finished then
+            goto continue
+        end
+
+        populateScreen(slot, config, gatheredItems)
+        config.complete = true
+
+        coroutine.yield()
+        ::continue::
     end
 
     resumeOnUpdate = false
