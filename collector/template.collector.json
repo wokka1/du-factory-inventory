@@ -27,8 +27,7 @@
         {"code":"_G.storageAcquired(\"${slotname}\")","filter":{"args":[],"signature":"storageAcquired()","slotKey":"7"},"key":"${key}"},
         {"code":"_G.storageAcquired(\"${slotname}\")","filter":{"args":[],"signature":"storageAcquired()","slotKey":"8"},"key":"${key}"},
         {"code":"_G.storageAcquired(\"${slotname}\")","filter":{"args":[],"signature":"storageAcquired()","slotKey":"9"},"key":"${key}"},
-        {"code":"${file:../../du-utils/duutils/Utilities.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:library}"},"key":"${key}"},
-        {"code":"${file:../../du-utils/duutils/Datastore.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:library}"},"key":"${key}"},
+        {"code":"${file:../common/Utilities.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:library}"},"key":"${key}"},
         {"code":"${file:../common/InventoryCommon.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:library}"},"key":"${key}"}
     ],
     "methods":[],

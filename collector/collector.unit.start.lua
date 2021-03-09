@@ -14,12 +14,10 @@ local Utilities = _G.Utilities
 local InventoryCommon = _G.InventoryCommon
 
 -- if not found by name will autodetect
-slots.screen = screen
 slots.databank = databank
 
 -- link missing slot inputs / validate provided slots
 local module = "inventory-report-scanner"
-slots.screen = _G.Utilities.loadSlot(slots.screen, "ScreenUnit", nil, module, "screen", true)
 slots.databank = _G.Utilities.loadSlot(slots.databank, "DataBankUnit", slots.screen, module, "databank")
 
 local nextContainer = nil
@@ -131,7 +129,6 @@ function _G.updateTick()
     if not incomplete then
         system.print("All containers complete, ending from timer.")
         InventoryCommon.validateDb(slots.databank)
-        -- _G.Datastore.dumpDb(slots.databank, slots.screen)
         unit.exit()
     end
 end

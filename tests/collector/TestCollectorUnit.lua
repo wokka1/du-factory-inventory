@@ -2,12 +2,11 @@
 --- Tests for collector unit.start.
 
 package.path = package.path .. ";../du-mocks/?.lua" -- add du-mocks project
-package.path = package.path .. ";../du-utils/?.lua" -- add du-utils project
 package.path = package.path .. ";../game-data-lua/?.lua" -- add fallback for dkjson
 
 local lu = require("luaunit")
 
-require("duutils.Utilities") -- require("common.Utilities")
+require("common.Utilities")
 local ic = require("common.InventoryCommon")
 _G.json = require("dkjson")
 
