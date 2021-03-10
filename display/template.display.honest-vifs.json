@@ -1,0 +1,28 @@
+{
+    "slots":{
+        "0":{"name":"row1","type":{"events":[],"methods":[]}},
+        "1":{"name":"row2","type":{"events":[],"methods":[]}},
+        "2":{"name":"slot3","type":{"events":[],"methods":[]}},
+        "3":{"name":"slot4","type":{"events":[],"methods":[]}},
+        "4":{"name":"slot5","type":{"events":[],"methods":[]}},
+        "5":{"name":"slot6","type":{"events":[],"methods":[]}},
+        "6":{"name":"slot7","type":{"events":[],"methods":[]}},
+        "7":{"name":"switch","type":{"events":[],"methods":[]}},
+        "8":{"name":"databank","type":{"events":[],"methods":[]}},
+        "9":{"name":"core","type":{"events":[],"methods":[]}},
+        "-1":{"name":"unit","type":{"events":[],"methods":[]}},
+        "-2":{"name":"system","type":{"events":[],"methods":[]}},
+        "-3":{"name":"library","type":{"events":[],"methods":[]}}
+    },
+    "handlers":[
+        {"code":"${file:screen/honest-vifs.row1.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:row1}"},"key":"${key}"},
+        {"code":"${file:screen/honest-vifs.row2.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:row2}"},"key":"${key}"},
+        {"code":"${file:display.start.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:unit}"},"key":"${key}"},
+        {"code":"${code:_G.resumeWork(true)}","filter":{"args":[],"signature":"update()","slotKey":"${slotKey:system}"},"key":"${key}"},
+        {"code":"${file:display.stop.lua}","filter":{"args":[],"signature":"stop()","slotKey":"${slotKey:unit}"},"key":"${key}"},
+        {"code":"${file:../common/Utilities.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:library}"},"key":"${key}"},
+        {"code":"${file:../common/InventoryCommon.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:library}"},"key":"${key}"}
+    ],
+    "methods":[],
+    "events":[]
+}
