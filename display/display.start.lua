@@ -6,7 +6,7 @@
 -- Latest version always available here: https://du.w3asel.com/du-factory-inventory
 
 -- exported variables
-local elementsReadPerUpdate = 100 --export: The number of elements to process for data collection before the coroutine sleeps.
+local elementsReadPerUpdate = 50 --export: The number of elements to process for data collection before the coroutine sleeps.
 local maxMassError = 0.001 -- max error allowed for container lookups
 
 -- localize global lookups
@@ -51,13 +51,13 @@ unit.hide()
 local STYLE_TEMPLATE = [[
 <style>
 text {
-    font-size: %fpx;
+    font-size: %.0fpx;
     fill: white;
     font-family: Arial;
     text-transform: none;
 }
 text.blockTitle {
-    font-size: %fpx;
+    font-size: %.0fpx;
     text-anchor: middle;
 }
 .empty .label {
@@ -69,13 +69,13 @@ text.blockTitle {
 .full .label {
     fill: #333;
 }
-.fillGreen, .fillGreen text {
+.fG, .fG text {
     fill: green;
 }
-.fillYellow, .fillYellow text {
+.fY, .fY text {
     fill: yellow;
 }
-.fillRed, .fillRed text {
+.fR, .fR text {
     fill: red;
 }
 rect.headerRule {
@@ -90,7 +90,7 @@ end
 local ROW_TEMPLATE = [[
 <g transform="translate(%.1f,%.1f)">
     <defs>
-        <clipPath id="percentClip%d">
+        <clipPath id="pc%d">
             <rect x="%.1f" y="0" width="1920" height="1920" />
         </clipPath>
     </defs>
@@ -100,7 +100,7 @@ local ROW_TEMPLATE = [[
         <text x="$countOffset" y="$textHeight" class="label">%s</text>
         <text x="$rightText" y="$textHeight" text-anchor="end">%.0f<tspan class="label">%%</tspan></text>
     </g>
-    <g class="full" clip-path="url(#percentClip%d)">
+    <g class="full" clip-path="url(#pc%d)">
         <rect x="0" y="0" width="%.1f" height="%.1f" class="%s"/>
         <text x="$leftText" y="$textHeight">%s</text>
         <text x="$countOffset" y="$textHeight" text-anchor="end">%s</text>
@@ -116,7 +116,7 @@ local function generateRowCell(item, itemConfig, itemData, xStart, yStart, width
     local itemName, itemLabel
     if type(item) == "table" then
         itemName = string.lower(item.name)
-        itemLabel = item.label or itemName
+        itemLabel = item.label or item.name
     else
         itemName = string.lower(item)
         itemLabel = item
@@ -155,19 +155,19 @@ local function generateRowCell(item, itemConfig, itemData, xStart, yStart, width
     local barColor
     if itemConfig.reverse then
         if percent > 0.9 then
-            barColor = "fillRed"
+            barColor = "fR"
         elseif percent > 0.5 then
-            barColor = "fillYellow"
+            barColor = "fY"
         else
-            barColor = "fillGreen"
+            barColor = "fG"
         end
     else
         if percent > 0.5 then
-            barColor = "fillGreen"
+            barColor = "fG"
         elseif percent > 0.1 then
-            barColor = "fillYellow"
+            barColor = "fY"
         else
-            barColor = "fillRed"
+            barColor = "fR"
         end
     end
 
@@ -216,7 +216,7 @@ local function generateTable(table, tableConfig, xOffset, yOffset, width, itemDa
 
     local document = ""
     if title then
-        document = string.format([[<text class="blockTitle" x="%f" y="%f">%s</text>]], xOffset + width / 2, yOffset + tableConfig.titleHeight * 3 / 4, title)
+        document = string.format([[<text class="blockTitle" x="%.1f" y="%.1f">%s</text>]], xOffset + width / 2, yOffset + tableConfig.titleHeight * 3 / 4, title)
         yOffset = yOffset + tableConfig.titleHeight
     end
 
@@ -235,10 +235,10 @@ local function generateTable(table, tableConfig, xOffset, yOffset, width, itemDa
     if type(table.columns) == "table" then
         for i, columnHeader in pairs(table.columns) do
             local headerX = xOffset + (i - 1) * (columnWidth + columnXPadding) + columnWidth / 2
-            document = document .. string.format([[<text x="%f" y="%f" text-anchor="middle">%s</text>]], headerX, yOffset + tableConfig.rowHeight * 3 / 4, columnHeader)
+            document = document .. string.format([[<text x="%.1f" y="%.1f" text-anchor="middle">%s</text>]], headerX, yOffset + tableConfig.rowHeight * 3 / 4, columnHeader)
         end
         yOffset = yOffset + rowHeight
-        document = document .. string.format([[<rect x="%f" y="%f" width="%f" height="%f" class="headerRule"/>]], xOffset, yOffset, width, tableConfig.headerRuleHeight)
+        document = document .. string.format([[<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" class="headerRule"/>]], xOffset, yOffset, width, tableConfig.headerRuleHeight)
         yOffset = yOffset + tableConfig.headerRuleHeight
     end
 
@@ -307,6 +307,14 @@ local function populateScreen(screen, screenConfig, itemData)
         document = document .. [[</g>]]
     end
     document = document .. "</svg>"
+
+    -- TODO minify silently, more effectively
+    if document:len() > 50000 then
+        system.print("Document too large (" .. document:len() .. "), minifying")
+        document = string.gsub(document, "%s%s+", " ")
+        system.print("Reduced to: " .. document:len())
+    end
+
     screen.setHTML(document)
 end
 

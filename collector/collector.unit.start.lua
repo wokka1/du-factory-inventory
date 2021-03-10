@@ -14,11 +14,29 @@ local Utilities = _G.Utilities
 local InventoryCommon = _G.InventoryCommon
 
 -- if not found by name will autodetect
+slots.screen = screen
 slots.databank = databank
 
 -- link missing slot inputs / validate provided slots
 local module = "inventory-report-scanner"
+slots.screen = _G.Utilities.loadSlot(slots.screen, "ScreenUnit", nil, module, "screen", true)
 slots.databank = _G.Utilities.loadSlot(slots.databank, "DataBankUnit", slots.screen, module, "databank")
+
+-- clear screen, will be appending html to it as a debug output log
+if slots.screen then
+    slots.screen.setHTML("")
+    slots.screen.activate()
+end
+
+local debugIndex = 0
+local debugFontSize = 2.5
+local function debugPrint(msg)
+    if slots.screen then
+        slots.screen.addText(0, debugIndex * debugFontSize, debugFontSize, msg)
+        debugIndex = debugIndex + 1
+    end
+    system.print(msg)
+end
 
 local nextContainer = nil
 local name
@@ -31,7 +49,11 @@ repeat
         containerCount = containerCount + 1
     end
 until nextContainer == nil
-assert(containerCount > 0, "Missing containers to register.")
+if containerCount == 0 then
+    local msg = "Missing containers to register."
+    debugPrint(msg)
+    assert(false, msg)
+end
 
 -- initialize
 local containerStatus = {}
@@ -56,8 +78,7 @@ local function processContainer(container)
     local name, quantity, unitMass, unitVolume, isMaterial
     for _, item in pairs(itemsList) do
         if name then
-            system.print(
-                string.format("Error: Multiple item types in container id %d: %s, %s, ...", id, name, item.name));
+            debugPrint(string.format("Error: Multiple item types in container id %d: %s, %s, ...", id, name, item.name));
             containerStatus[container].complete = true
             return
         else
@@ -69,7 +90,7 @@ local function processContainer(container)
         end
     end
     if not name then
-        system.print(string.format("Error: No items in container id %d", id));
+        debugPrint(string.format("Error: No items in container id %d", id));
         containerStatus[container].complete = true
         return
     end
@@ -102,7 +123,7 @@ local function processContainer(container)
     local containerString = json.encode(containerDetails)
     slots.databank.setStringValue(containerKey, containerString)
 
-    system.print(string.format("Registered \"%s\" to container id: %d", name, id))
+    debugPrint(string.format("Registered \"%s\" to container id: %d", name, id))
 
     containerStatus[container].complete = true
 end
@@ -127,7 +148,7 @@ function _G.updateTick()
     end
 
     if not incomplete then
-        system.print("All containers complete, ending from timer.")
+        debugPrint("All containers complete, ending from timer.")
         InventoryCommon.validateDb(slots.databank)
         unit.exit()
     end
