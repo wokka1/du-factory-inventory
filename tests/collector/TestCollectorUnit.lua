@@ -16,6 +16,7 @@ local unitStart = loadfile("./collector/collector.unit.start.lua")
 local mockDatabankUnit = require("dumocks.DatabankUnit")
 local mockControlUnit = require("dumocks.ControlUnit")
 local mockContainerUnit = require("dumocks.ContainerUnit")
+local mockScreenUnit = require("dumocks.ScreenUnit")
 
 _G.TestCollectorUnit = {}
 
@@ -93,6 +94,39 @@ function _G.TestCollectorUnit:testNothingToScan()
     _G.unit = self.unit
 
     lu.assertErrorMsgContains("Missing containers", unitStart)
+    -- error message went to console as well
+    lu.assertStrIContains(self.printOutput, "Missing containers")
+end
+
+--- Verify screen gets output when attached.
+function _G.TestCollectorUnit:testScreenOutput()
+
+    self.screenMock = mockScreenUnit:new(nil, 10)
+    self.screen = self.screenMock:mockGetClosure()
+
+    -- reset linked elements to only databank and screen
+    self.unitMock.linkedElements = {}
+    self.unitMock.linkedElements["databank"] = self.databank
+    self.unitMock.linkedElements["screen"] = self.screen
+    self.unit = self.unitMock:mockGetClosure()
+
+    _G.unit = self.unit
+
+    -- prime screen with data, should be cleared on start
+    self.screen.setHTML("<div>Old Content</div>")
+
+    lu.assertEquals(self.screen.getState(), 0)
+    lu.assertStrIContains(self.screenMock.html, "Old Content")
+
+    lu.assertErrorMsgContains("Missing containers", unitStart)
+
+    -- screen enabled, base message was cleared
+    lu.assertEquals(self.screen.getState(), 1)
+    lu.assertNotStrIContains(self.screenMock.html, "Old Content")
+
+    -- error message went to screen and console as well
+    lu.assertStrIContains(self.printOutput, "Missing containers")
+    lu.assertStrIContains(self.screenMock.html, "Missing containers")
 end
 
 --- Verify results of a container scan on expected types of contents: empty.
