@@ -33,7 +33,7 @@ Configurable, screen-based factory inventory monitor.
 1. Install the display programming board and copy the [base display script](https://du.w3asel.com/du-factory-inventory/templates/template.display.base.json) to it. Make sure you copy the raw data, not your browser's JSON formatted page.
     1. You should get a "Lua script loaded" confirmation message. If this is not the case try pasting the JSON in notepad to confirm that the right data is in the clipboard.
 2. Link the named slots to the appropriate elements: Core, Databank, and Manual Switch if using one to turn on the programming board (use the link tool right-click -> Select an OUT plug to link to... option to specify what link is used). Alternately, you can use [this version of the script](https://du.w3asel.com/du-factory-inventory/templates/template.display.blank.json) and link any slot to any element for it to autodetect slot assignment on startup, though you'll still need to track which slots are used for what displays as detailed in the next step.
-3. Select the desired templates to add from the [display/screen](display/screen) directory.
+3. Select the desired templates to add from the [display/screen](display/screen) directory. **TODO create and link to template images page**
     1. Link a display to put the template on to the programming board.
     2. Open the programming board (right-click -> Advanced -> Edit Lua script) and select the slot that links the new display. You may want to rename the slot for clarity, but make sure you don't add spaces or punctuation in the slot name.
     3. Click "+ Add Filter" at the bottom of the filter panel, then mouse over the three dots to the left of the filter and select "start".
@@ -54,6 +54,16 @@ Configurable, screen-based factory inventory monitor.
     2. If too many queries have been made to the container API (the limit is ten every five minutes), you'll get an error message printed to the Lua console to that effect and the script will continue running. It will retry the query every thirty seconds until it succeeds, which may take up about five minutes if this is the only container script running or longer if you have multiple going at the same time. You can relog to clear the timeout, or just wait for it to finish.
     3. You may optionally link the board to a screen to get the normal console log printed to a display (useful when using through a surrogate session). If the text runs off the display edit the display to view it. This will reduce the number of containers that can be scanned at a time by one.
 5. Return to your display programming board and activate it, the registered containers should now show their contents on the display.
+
+## Display Templates
+
+Template documentation isn't a priority while I'm actively developing, for now look through examples in [display/screen](display/screen).
+
+**TODO detail this, provide sample template with all options specified**
+
+Many attributes can be applied at any level and will inherit downward, such as ```countOffset```, which specifies in pixels where in the row the current count is displayed (item label is on the left, percent of target is on the right). If applied at the top of the screen config it will apply to all tables and item rows, unless the specific table or item row overrides it with a different value.
+
+If you aren't up to building a custom display yourself and want to commission a display to match your needs contact me on discord (info below) and we can try to work something out.
 
 ## Building from a Template
 
