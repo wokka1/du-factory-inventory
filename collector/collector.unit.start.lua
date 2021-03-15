@@ -19,8 +19,8 @@ slots.databank = databank
 
 -- link missing slot inputs / validate provided slots
 local module = "inventory-report-scanner"
-slots.screen = _G.Utilities.loadSlot(slots.screen, "ScreenUnit", nil, module, "screen", true)
-slots.databank = _G.Utilities.loadSlot(slots.databank, "DataBankUnit", slots.screen, module, "databank")
+slots.screen = Utilities.loadSlot(slots.screen, "ScreenUnit", nil, module, "screen", true)
+slots.databank = Utilities.loadSlot(slots.databank, "DataBankUnit", slots.screen, module, "databank")
 
 -- clear screen, will be appending html to it as a debug output log
 if slots.screen then
@@ -42,7 +42,7 @@ local nextContainer = nil
 local name
 local containerCount = 0
 repeat
-    nextContainer, name = _G.Utilities.findFirstSlot("ItemContainer", slots.containers)
+    nextContainer, name = Utilities.findFirstSlot("ItemContainer", slots.containers)
 
     if nextContainer ~= nil then
         slots.containers[name] = nextContainer
@@ -123,7 +123,7 @@ local function processContainer(container)
     local containerString = json.encode(containerDetails)
     slots.databank.setStringValue(containerKey, containerString)
 
-    debugPrint(string.format("Registered \"%s\" to container id: %d", name, id))
+    debugPrint(string.format("Registered \"%s\" to container id: %d, optimization: %.2f", name, id, containerOptimization))
 
     containerStatus[container].complete = true
 end

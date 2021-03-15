@@ -47,6 +47,9 @@ end
 
 --- Unset all globals set/used by unit.start.
 function _G.TestCollectorUnit:teardown()
+    _G.databank = nil
+    _G.unit = nil
+
     _G.slots = nil
     _G.updateTick = nil
     _G.storageAcquired = nil
