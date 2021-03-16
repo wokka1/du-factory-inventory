@@ -72,7 +72,7 @@ function _G.InventoryCommon.removeContainerFromDb(databank, containerId)
 end
 
 --- Examines the databank, searching for duplicate keys, containers with multiple mappings, etc.
-local ITEM_CONTAINER_PATTERN = ".-%" .. constants.CONTAINER_SUFFIX .. "$"
+local ITEM_CONTAINER_PATTERN = ".-%" .. constants.CONTAINER_SUFFIX .. "$" -- escape "." prefix
 function _G.InventoryCommon.validateDb(databank)
     local keyCount = {}
     local containerCount = {}
