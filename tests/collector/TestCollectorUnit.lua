@@ -286,6 +286,63 @@ function _G.TestCollectorUnit:testProcessContainerPart()
     lu.assertEquals(containerData, expectedContainerData)
 end
 
+--- Verify results of a container scan with container optimization applied.
+function _G.TestCollectorUnit:testProcessContainerOptimization()
+    -- initialize, map databank and container, clear auto-map output
+    _G.unit = self.unit
+    unitStart()
+    self.printOutput = ""
+
+    local function callbackFunction()
+        _G.storageAcquired("container1")
+    end
+    self.containerMock1:mockRegisterStorageAcquired(callbackFunction)
+
+    -- use oxygen for 1.0 density
+    local optimization = 0.8
+    local density = 1.0
+    self.containerMock1.itemsVolume = 20
+    self.containerMock1.itemsMass = self.containerMock1.itemsVolume * density * optimization
+    local itemName = "Pure Oxygen"
+    local itemJson = string.format(mockContainerUnit.JSON_ITEM_TEMPLATE, "OxygenPure", itemName,
+                         self.containerMock1.itemsVolume, "material", density, 1.0)
+    self.containerMock1.storageJson = "[" .. itemJson .. "]"
+
+    lu.assertTrue(self.containerMock1.storageRequested, "Should have requested storage on initial unit.start run.")
+    self.containerMock1:mockDoStorageAcquired()
+
+    -- intended container finished
+    lu.assertStrIContains(self.printOutput, "Registered \"" .. itemName .. "\" to container id: " .. self.container1.getId())
+    -- scan completed
+    lu.assertStrIContains(self.printOutput, "All containers complete,")
+
+    -- verify result in databank
+
+    -- item data unchanged
+    -- itemName -> unitMass, unitVolume, isMaterial
+    local expectedItemData = {
+        unitMass = density,
+        unitVolume = 1,
+        isMaterial = true
+    }
+    local itemNameLower = itemName:lower()
+    local itemData = self.databankMock.data[itemNameLower]
+    lu.assertNotNil(itemData)
+    itemData = json.decode(itemData)
+    lu.assertEquals(itemData, expectedItemData)
+
+    -- container.id -> selfMass, maxVolume, optimization
+    local expectedContainerData = {
+        selfMass = self.container1.getSelfMass(),
+        maxVolume = self.container1.getMaxVolume(),
+        optimization = optimization
+    }
+    local containerData = self.databankMock.data[ic.constants.CONTAINER_PREFIX .. self.container1.getId()]
+    lu.assertNotNil(containerData)
+    containerData = json.decode(containerData)
+    lu.assertEquals(containerData, expectedContainerData)
+end
+
 --- Verify error behavior when a container has multiple items/materials on scan.
 function _G.TestCollectorUnit:testContainerMultipleItems()
     -- initialize, map databank and container, clear auto-map output
