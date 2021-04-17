@@ -69,13 +69,13 @@ If you aren't up to building a custom display yourself and want to commission a 
 
 ### Container Optimization not registering properly / incorrect counts on optimized containers
 
-There are cases where items in a container placed with the Container Optimization skill don't have their mass reduced. The scanner can only detect the container optimization applied to the container by the mass reduction, so it won't detect the proper level of optimization, throwing off the counts when the mass reduction kicks in.
+There are cases where items in a container placed with the Container Optimization skill don't have their mass reduced (mining to a container, industry units interacting with a container, etc). The scanner can only detect the container optimization applied to the container by the mass reduction, so it won't detect the proper level of optimization, throwing off the counts when the mass reduction kicks in.
 
 The presense of this bug can be detected by the player by inspecting an item in an optimized container and comparing the stack mass with the container mass: assuming only one item stack is present if they match then the container optimization isn't applied. Getting the game to register the container optimization seems to be as simple as picking up the item that is not reduced and moving it to a different slot in the container.
 
-The simple fix for this is to reconnect the scanning programming board once the optimization is applied and rescanning it, though if it happened to many containers this can be a hassle.
+The simple fix for this is to reconnect the scanning programming board once the optimization is applied and rescanning it, though if it happened to many containers this can be a hassle. Additionally, if industry units cause the container to constantly revert back to non-optimized mass it's probably preferable to have it tracked as non-optimized.
 
-Alternately, you can run the [Databank Override script](https://du.w3asel.com/du-factory-inventory/templates/template.databankoverride.json) to fix any/all containers by directly overriding the databank contents for them. Simply install the linked script to a programming board, then edit lua parameters (right-click -> Advanced -> Edit Lua parameters), check the box for "overrideContainerOptimization", set the desired skill level (0-5), and either enter the container IDs (in quotes) or "all" for targetContainers to specify what to update.
+To mass-reset containers you can run the [Databank Override script](https://du.w3asel.com/du-factory-inventory/templates/template.databankoverride.json) to fix any/all containers by directly overriding the databank contents for them. Simply install the linked script to a programming board, then edit lua parameters (right-click -> Advanced -> Edit Lua parameters), check the box for "overrideContainerOptimization", set the desired skill level (0-5), and either enter the container IDs (in quotes) or "all" for targetContainers to specify what to update.
 
 ## Building from a Template
 
