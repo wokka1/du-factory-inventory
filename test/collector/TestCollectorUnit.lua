@@ -11,7 +11,7 @@ local ic = require("common.InventoryCommon")
 _G.json = require("dkjson")
 
 -- load file into a function for efficient calling
-local unitStart = loadfile("./collector/collector.unit.start.lua")
+local unitStart = loadfile("./src/collector/collector.unit.start.lua")
 
 local mockDatabankUnit = require("dumocks.DatabankUnit")
 local mockControlUnit = require("dumocks.ControlUnit")
