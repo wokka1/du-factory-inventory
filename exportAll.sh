@@ -8,8 +8,8 @@ targetDirectory=templateExports
 rm -rf $targetDirectory
 mkdir -p $targetDirectory
 
-for template in **/*.json
+for template in src/**/*.json
 do
     templateName=`basename $template`
-    ../du-bundler/bundleTemplate.lua $template $targetDirectory/$templateName
+    du-bundler $template $targetDirectory/$templateName
 done

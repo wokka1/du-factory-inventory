@@ -48,7 +48,7 @@ Configurable, screen-based factory inventory monitor.
     1. You should get a "Lua script loaded" confirmation message. If this is not the case try pasting the JSON in notepad to confirm that the right data is in the clipboard.
     2. I recommend renaming this programming board to indicate what it is (such as "Inventory Registration"), as the script may take some time to run when registering many containers and it will leave the widget visible as a reminder not to get out of load range while it works.
 2. Link the board to the databank that is already connected to the display programming board. You should get a popup for "Slot Compatibility Check", click "yes" to proceed.
-3. Link the board to containers that hold items that you want to show on the display (up to nine containers can be linked at a time).
+3. Link the board to containers that hold items that you want to show on the display (up to nine containers can be linked at a time). If using container hubs link to the hub instead of the individual containers.
 4. Activate the programming board (you must be out of build mode to activate it directly). It should print out a series of message telling you what item name is linked to what container id and shut down.
     1. Containers must contain only the item that they're meant to hold for the container to register properly. Otherwise an error message will print to the Lua console notifying you of what the problem with the container is and you will need to rerun the script once it's been resolved.
     2. If too many queries have been made to the container API (the limit is ten every five minutes), you'll get an error message printed to the Lua console to that effect and the script will continue running. It will retry the query every thirty seconds until it succeeds, which may take up about five minutes if this is the only container script running or longer if you have multiple going at the same time. You can relog to clear the timeout, or just wait for it to finish.
@@ -69,35 +69,37 @@ If you aren't up to building a custom display yourself and want to commission a 
 
 ### Container Optimization not registering properly / incorrect counts on optimized containers
 
-There are cases where items in a container placed with the Container Optimization skill don't have their mass reduced. The scanner can only detect the container optimization applied to the container by the mass reduction, so it won't detect the proper level of optimization, throwing off the counts when the mass reduction kicks in.
+There are cases where items in a container placed with the Container Optimization skill don't have their mass reduced (mining to a container, industry units interacting with a container, etc). The scanner can only detect the container optimization applied to the container by the mass reduction, so it won't detect the proper level of optimization, throwing off the counts when the mass reduction kicks in.
 
 The presense of this bug can be detected by the player by inspecting an item in an optimized container and comparing the stack mass with the container mass: assuming only one item stack is present if they match then the container optimization isn't applied. Getting the game to register the container optimization seems to be as simple as picking up the item that is not reduced and moving it to a different slot in the container.
 
-The simple fix for this is to reconnect the scanning programming board once the optimization is applied and rescanning it, though if it happened to many containers this can be a hassle.
+The simple fix for this is to reconnect the scanning programming board once the optimization is applied and rescanning it, though if it happened to many containers this can be a hassle. Additionally, if industry units cause the container to constantly revert back to non-optimized mass it's probably preferable to have it tracked as non-optimized.
 
-Alternately, you can run the [Databank Override script](https://du.w3asel.com/du-factory-inventory/templates/template.databankoverride.json) to fix any/all containers by directly overriding the databank contents for them. Simply install the linked script to a programming board, then edit lua parameters (right-click -> Advanced -> Edit Lua parameters), check the box for "overrideContainerOptimization", set the desired skill level (0-5), and either enter the container IDs (in quotes) or "all" for targetContainers to specify what to update.
+To mass-reset containers you can run the [Databank Override script](https://du.w3asel.com/du-factory-inventory/templates/template.databankoverride.json) to fix any/all containers by directly overriding the databank contents for them. Simply install the linked script to a programming board, then edit lua parameters (right-click -> Advanced -> Edit Lua parameters), check the box for "overrideContainerOptimization", set the desired skill level (0-5), and either enter the container IDs (in quotes) or "all" for targetContainers to specify what to update.
 
 ## Building from a Template
 
-This project is designed to be used with my other Dual Universe project: [DU Bundler](https://github.com/1337joe/du-bundler).
+This project is designed to be used with my other Dual Universe project [DU Bundler](https://github.com/1337joe/du-bundler), which can be installed by calling `luarocks install du-bundler`.
 
-Documentation of the bundler is at the above link, but to put it simply you need to be able to run Lua scripts and simply call `bundleTemplate.lua template.json` (with appropriate paths for file locations) and it will build a json configuration based on the template. On Linux this can be piped to `xclip -selection c` to put it directly on the clipboard, while on Windows piping to `clip.exe` should do the same thing. Alternately, you can write it to a file and copy from there.
+Documentation of the bundler is at the above link, but to put it simply you need to be able to run Lua scripts and simply call `du-bundler template.json` (with appropriate paths for file locations) and it will build a json configuration based on the template. On Linux this can be piped to `xclip -selection c` to put it directly on the clipboard, while on Windows piping to `clip.exe` should do the same thing. Alternately, you can write it to a file and copy from there.
 
 If you don't have a Lua runtime set up the easiest solution is to copy from the configurations hosted on the [project page on my website](https://du.w3asel.com/du-factory-inventory/). Each template included in the repository is built automatically on update and uploaded there. The alternative is manually replacing the tags (`${tag}`) according to the rules of the templater.
 
 ## Developer Dependencies
 
-* [DU Bundler](https://github.com/1337joe/du-bundler): For exporting to json.
+Luarocks can be used to install all dependencies: `luarocks install --only-deps du-factory-inventory-scm-0.rockspec`
 
-* luaunit: For automated testing. Note that this is only available on luarocks for lua 5.3. If your primary lua install is 5.4 you can install against 5.3 but you'll have to modify the `runTests.sh` script to call `lua5.3` instead of `lua`.
+* dkjson - Used for testing of json data and for json serialization/deserialization in-game. This will fall back to (from the project root) `../game-data-lua` if dkjson isn't installed.
 
-* [DU Mocks](https://github.com/1337joe/du-mocks): For automated testing. Currently assumes that this is located from the project root at `../du-mocks`.
+* Dual Universe/Game/data/lua: For automated testing without installing dkjson, link or copy your C:\ProgramData\Dual Universe\Game\data\lua directory to ../game-data-lua relative to within the root directory of the project.
 
-* luacov: For tracking code coverage when running all tests. Can be removed from `runTests.sh` if not desired.
+* [luaunit](https://github.com/bluebird75/luaunit): For automated testing.
 
-* dkjson - Used for testing of json data and for json serialization/deserialization in-game. This will fall back to the ../game-data-lua directory if dkjson isn't installed.
+* [luacov](https://keplerproject.github.io/luacov/): For tracking code coverage when running all tests. Can be removed from `runTests.sh` if not desired. To view results using luacov-html (which is a separate package) simply run `luacov -r html` after running tests and open `luacov-html/index.html`.
 
-* Dual Universe/Game/data/lua: For automated testing, link or copy your C:\ProgramData\Dual Universe\Game\data\lua directory to ../game-data-lua relative to within the root directory of the project.
+* [DU Mocks](https://github.com/1337joe/du-mocks): For automated testing. This will fall back to (from the project root) `../du-mocks` if not installed.
+
+* [du-bundler](https://github.com/1337joe/du-bundler): For exporting templates to json to paste into Dual Universe.
 
 ## Support
 

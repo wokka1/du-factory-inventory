@@ -1,8 +1,8 @@
 #!/usr/bin/env lua
 --- Tests for databank override unit.start.
 
-package.path = package.path .. ";../du-mocks/?.lua" -- add du-mocks project
-package.path = package.path .. ";../game-data-lua/?.lua" -- add fallback for dkjson
+package.path = package.path .. ";../du-mocks/src/?.lua" -- add fallback to du-mocks project (if not installed on path)
+package.path = package.path .. ";../game-data-lua/?.lua" -- add fallback for dkjson (if not installed on path)
 
 local lu = require("luaunit")
 
@@ -11,7 +11,7 @@ local ic = require("common.InventoryCommon")
 _G.json = require("dkjson")
 
 -- load file into a function for efficient calling
-local unitStart = loadfile("./collector/databankoverride.unit.start.lua")
+local unitStart = loadfile("./src/collector/databankoverride.unit.start.lua")
 
 local mockDatabankUnit = require("dumocks.DatabankUnit")
 local mockControlUnit = require("dumocks.ControlUnit")

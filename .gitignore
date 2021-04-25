@@ -1,6 +1,9 @@
 results/
 templateExports/
+
 *.luacov
+luacov*
+cobertura.xml
 
 # ---> Lua
 # Compiled Lua sources

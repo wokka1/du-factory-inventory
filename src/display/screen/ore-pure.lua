@@ -45,8 +45,8 @@ screenConfig.tables[#screenConfig.tables + 1] = {
     columns = {"Tier 3", ""},
     rows = {
         {"Petalite", {name = "Pure Lithium", label = "Lithium"}},
-        {"Garnierite", {name = "Nickel Pure", label = "Nickel"}},
-        {"Acanthite", {name = "Silver Pure", label = "Silver"}},
+        {"Garnierite", {name = "Pure Nickel", label = "Nickel"}},
+        {"Acanthite", {name = "Pure Silver", label = "Silver"}},
         {"Pyrite", {name = "Pure Sulfur", label = "Sulfur"}},
     }
 }
@@ -54,18 +54,18 @@ screenConfig.tables[#screenConfig.tables + 1] = {
     columns = {"Tier 4", ""},
     rows = {
         {"Cobaltite", {name = "Pure Cobalt", label = "Cobalt"}},
-        {"Cryolite", {name = "Pure Cryolite", label = "Cryolite"}},
+        {"Cryolite", {name = "Pure Fluorine", label = "Fluorine"}},
         {{name = "Gold Nuggets", label = "Gold Ngts"}, {name = "Pure Gold", label = "Gold"}},
-        {"Kolbeckite", {name = "Scandium Pure", label = "Scandium"}},
+        {"Kolbeckite", {name = "Pure Scandium", label = "Scandium"}},
     }
 }
 screenConfig.tables[#screenConfig.tables + 1] = {
     columns = {"Tier 5", ""},
     rows = {
-        {"Columbite", {name = "Niobium Pure", label = "Niobium"}},
+        {"Columbite", {name = "Pure Niobium", label = "Niobium"}},
         {"Rhodonite", {name = "Pure Manganese", label = "Manganese"}},
         {"Illmenite", {name = "Pure Titanium", label = "Titanium"}},
-        {"Vanadinite", {name = "Vanadium Pure", label = "Vanadium"}},
+        {"Vanadinite", {name = "Pure Vanadium", label = "Vanadium"}},
     }
 }
 screenConfig.tables[#screenConfig.tables + 1] = {
