@@ -1,6 +1,7 @@
 #!/usr/bin/env lua
 --- Tests for Utilities.
 
+package.path = "src/?.lua;" .. package.path -- add src directory
 package.path = package.path .. ";../du-mocks/src/?.lua" -- add fallback to du-mocks project (if not installed on path)
 
 local lu = require("luaunit")

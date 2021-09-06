@@ -9,9 +9,6 @@ exitCode=0
 # simplify paths by working from project root
 cd "$(dirname "$0")/.."
 
-# set lua path to include src directory
-export LUA_PATH="src/?.lua;;"
-
 # clear out old results
 rm -rf test/results
 mkdir -p test/results/
