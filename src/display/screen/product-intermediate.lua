@@ -96,7 +96,7 @@ screenConfig.tables[#screenConfig.tables + 1] = {
         {{name = "Glass Product", label = "Glass", targetCount = 6000}},
         {{name = "Advanced Glass Product", label = "Advanced", targetCount = 1000}},
         {{name = "Ag-Li Reinforced Glass Product", label = "Ag-Li Reinf", targetCount = 1000}},
-        {{name = "Gold Coated Glass Product", label = "Gold Ctd", targetCount = 1000}},
+        {{name = "Gold-Coated Glass Product", label = "Gold Ctd", targetCount = 1000}},
         {{name = "Manganese Reinforced Glass Product", label = "Manganese", targetCount = 1000}},
     }
 }
