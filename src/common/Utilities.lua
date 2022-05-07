@@ -36,7 +36,8 @@ end
 
 
 --- Finds the first slot on 'unit' that has element class 'slotClass' and is not listed in the exclude list.
--- @tparam string slotClass The element class of the target slot. May instead be a table containing a list of class names.
+-- @tparam string slotClass The element class pattern of the target slot. May instead be a table containing a list of
+--   class names.
 -- @tparam table exclude A list of slots to exclude from search.
 -- @return The first element found of the desired type, or nil if none is found.
 -- @return The name of the slot where the returned element was found.
@@ -57,7 +58,7 @@ function _G.Utilities.findFirstSlot(slotClass, exclude)
 
         if value and type(value) == "table" and value.getElementClass then
             for _, class in pairs(slotClass) do
-                if value.getElementClass() == class then
+                if string.match(value.getElementClass(), class) ~= nil then
                     return value, key
                 end
             end

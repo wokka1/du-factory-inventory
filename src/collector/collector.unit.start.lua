@@ -42,7 +42,7 @@ local nextContainer = nil
 local name
 local containerCount = 0
 repeat
-    nextContainer, name = Utilities.findFirstSlot("ItemContainer", slots.containers)
+    nextContainer, name = Utilities.findFirstSlot("Container%a+Group", slots.containers)
 
     if nextContainer ~= nil then
         slots.containers[name] = nextContainer

@@ -23,7 +23,7 @@ function _G.TestUtilities.testPrintableNumberUnits()
 
     for i=1,30 do
         expected = BIG_PREFIXES[math.min(math.floor(i / 3) + 1, #BIG_PREFIXES)]
-        value = math.pow(10, i)
+        value = 10 ^ i
         _,actual = ut.printableNumber(value, "")
         lu.assertEquals(actual, expected, "Prefix for: "..value)
     end
@@ -35,7 +35,7 @@ function _G.TestUtilities.testPrintableNumberUnitsNegative()
 
     for i=1,30 do
         expected = BIG_PREFIXES[math.min(math.floor(i / 3) + 1, #BIG_PREFIXES)]
-        value = -math.pow(10, i)
+        value = -(10 ^ i)
         _,actual = ut.printableNumber(value, "")
         lu.assertEquals(actual, expected, "Prefix for: "..value)
     end
@@ -299,6 +299,11 @@ function _G.TestUtilities.testFindFirstSlot()
 
     -- found, single choice
     actual, actualSlot = _G.Utilities.findFirstSlot(databank.getElementClass());
+    lu.assertIs(actual, databank)
+    lu.assertEquals(actualSlot, "databank")
+
+    -- found by pattern match, single choice
+    actual, actualSlot = _G.Utilities.findFirstSlot("DataBank%a+");
     lu.assertIs(actual, databank)
     lu.assertEquals(actualSlot, "databank")
 
