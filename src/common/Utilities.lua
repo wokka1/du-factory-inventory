@@ -56,9 +56,9 @@ function _G.Utilities.findFirstSlot(slotClass, exclude)
             end
         end
 
-        if value and type(value) == "table" and value.getElementClass then
+        if value and type(value) == "table" and value.getClass then
             for _, class in pairs(slotClass) do
-                if string.match(value.getElementClass(), class) ~= nil then
+                if string.match(value.getClass(), class) ~= nil then
                     return value, key
                 end
             end
@@ -98,7 +98,7 @@ function _G.Utilities.loadSlot(provided, targetClass, errorScreen, moduleName, m
     local slotName
 
     local typedSlot = provided
-    if not (typedSlot and type(typedSlot) == "table" and typedSlot.getElementClass) then
+    if not (typedSlot and type(typedSlot) == "table" and typedSlot.getClass) then
         typedSlot, slotName = _G.Utilities.findFirstSlot(targetClass)
         if not optional then
             assertValid(typedSlot, string.format("%s: %s link not found.", moduleName, mappedSlotName), errorScreen)
@@ -110,7 +110,7 @@ function _G.Utilities.loadSlot(provided, targetClass, errorScreen, moduleName, m
             system.print(string.format("%s: %s", moduleName, optionalMessage))
         end
     else
-        local class = typedSlot.getElementClass()
+        local class = typedSlot.getClass()
         local valid = false
         for _, tClass in pairs(targetClass) do
             valid = valid or class == tClass

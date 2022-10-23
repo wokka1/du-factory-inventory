@@ -188,14 +188,14 @@ function _G.TestInventoryCommon.testValidateDb()
     local hackedDatabank = {
         getStringValue = databank.getStringValue
     }
-    function hackedDatabank.getKeys()
+    function hackedDatabank.getKeyList()
         local keysList = {}
         for key,_ in pairs(databankMock.data) do
             for i = 1, databankMock.data[key] do
-                keysList[#keysList + 1] = string.format([["%s"]], key)
+                keysList[#keysList + 1] = string.format("%s", key)
             end
         end
-        return "[" .. table.concat(keysList, ",") .. "]"
+        return keysList
     end
 
     systemPrint = ""

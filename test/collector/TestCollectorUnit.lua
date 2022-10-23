@@ -1,5 +1,5 @@
 #!/usr/bin/env lua
---- Tests for collector unit.start.
+--- Tests for collector unit.onStart.
 
 package.path = "src/?.lua;" .. package.path -- add src directory
 package.path = package.path .. ";../du-mocks/src/?.lua" -- add fallback to du-mocks project (if not installed on path)
@@ -12,12 +12,33 @@ local ic = require("common.InventoryCommon")
 _G.json = require("dkjson")
 
 -- load file into a function for efficient calling
-local unitStart = loadfile("./src/collector/collector.unit.start.lua")
+local unitStart = loadfile("./src/collector/collector.unit.onStart.lua")
 
 local mockDatabankUnit = require("dumocks.DatabankUnit")
 local mockControlUnit = require("dumocks.ControlUnit")
 local mockContainerUnit = require("dumocks.ContainerUnit")
 local mockScreenUnit = require("dumocks.ScreenUnit")
+
+local itemDatabase = {
+    [947806142] = {
+        id = 947806142,
+        type = "material",
+        unitVolume = 1.0,
+        unitMass = 1.0,
+        name = "OxygenPure",
+        displayName = "Pure Oxygen",
+        tier = 0,
+    },
+    [1331181119] = {
+        id = 947806142,
+        type = "object",
+        unitVolume = 10.0,
+        unitMass = 28.95,
+        name = "hydraulics_1",
+        displayName = "Basic Hydraulics",
+        tier = 1,
+    }
+}
 
 _G.TestCollectorUnit = {}
 
@@ -42,18 +63,21 @@ function _G.TestCollectorUnit:setup()
     _G.system = {
         print = function(output)
             self.printOutput = self.printOutput .. output .. "\n"
+        end,
+        getItem = function(id)
+            return itemDatabase[id]
         end
     }
 end
 
---- Unset all globals set/used by unit.start.
+--- Unset all globals set/used by unit.onStart.
 function _G.TestCollectorUnit:teardown()
     _G.databank = nil
     _G.unit = nil
 
     _G.slots = nil
     _G.updateTick = nil
-    _G.storageAcquired = nil
+    _G.contentUpdated = nil
 end
 
 --- Verify slot loader maps all elements and reports correctly.
@@ -141,15 +165,12 @@ function _G.TestCollectorUnit:testProcessContainerEmpty()
     self.printOutput = ""
 
     local function callbackFunction()
-        _G.storageAcquired("container1")
+        _G.contentUpdated("container1")
     end
-    self.containerMock1:mockRegisterStorageAcquired(callbackFunction)
+    self.containerMock1:mockRegisterContentUpdate(callbackFunction)
 
-    -- no contents
-    self.containerMock1.storageJson = "[]"
-
-    lu.assertTrue(self.containerMock1.storageRequested, "Should have requested storage on initial unit.start run.")
-    self.containerMock1:mockDoStorageAcquired()
+    lu.assertTrue(self.containerMock1.storageRequested, "Should have requested storage on initial unit.onStart run.")
+    self.containerMock1:mockDoContentUpdate({})
 
     -- intended container finished
     lu.assertStrIContains(self.printOutput, "Error: No items in container id " .. self.container1.getId())
@@ -169,21 +190,18 @@ function _G.TestCollectorUnit:testProcessContainerMaterial()
     self.printOutput = ""
 
     local function callbackFunction()
-        _G.storageAcquired("container1")
+        _G.contentUpdated("container1")
     end
-    self.containerMock1:mockRegisterStorageAcquired(callbackFunction)
+    self.containerMock1:mockRegisterContentUpdate(callbackFunction)
 
     -- use oxygen for 1.0 density
     local density = 1.0
     self.containerMock1.itemsVolume = 20
     self.containerMock1.itemsMass = self.containerMock1.itemsVolume * density
     local itemName = "Pure Oxygen"
-    local itemJson = string.format(mockContainerUnit.JSON_ITEM_TEMPLATE, "OxygenPure", itemName,
-                         self.containerMock1.itemsVolume, "material", density, 1.0)
-    self.containerMock1.storageJson = "[" .. itemJson .. "]"
 
-    lu.assertTrue(self.containerMock1.storageRequested, "Should have requested storage on initial unit.start run.")
-    self.containerMock1:mockDoStorageAcquired()
+    lu.assertTrue(self.containerMock1.storageRequested, "Should have requested storage on initial unit.onStart run.")
+    self.containerMock1:mockDoContentUpdate({{ id = 947806142, quantity = self.containerMock1.itemsVolume }})
 
     -- intended container finished
     lu.assertStrIContains(self.printOutput, "Registered \"" .. itemName .. "\" to container id: " .. self.container1.getId())
@@ -232,22 +250,19 @@ function _G.TestCollectorUnit:testProcessContainerPart()
     self.printOutput = ""
 
     local function callbackFunction()
-        _G.storageAcquired("container1")
+        _G.contentUpdated("container1")
     end
-    self.containerMock1:mockRegisterStorageAcquired(callbackFunction)
+    self.containerMock1:mockRegisterContentUpdate(callbackFunction)
 
     -- use hydraulics for non-1 unit mass/volume
     local unitMass = 28.95
     local unitVolume = 10
-    self.containerMock1.itemsVolume = 277
-    self.containerMock1.itemsMass = self.containerMock1.itemsVolume * unitMass
+    self.containerMock1.itemsVolume = 2770
+    self.containerMock1.itemsMass = self.containerMock1.itemsVolume / unitVolume * unitMass
     local itemName = "Basic Hydraulics"
-    local itemJson = string.format(mockContainerUnit.JSON_ITEM_TEMPLATE, "hydraulics_1", itemName,
-                         self.containerMock1.itemsVolume, "part", unitMass, unitVolume)
-    self.containerMock1.storageJson = "[" .. itemJson .. "]"
 
-    lu.assertTrue(self.containerMock1.storageRequested, "Should have requested storage on initial unit.start run.")
-    self.containerMock1:mockDoStorageAcquired()
+    lu.assertTrue(self.containerMock1.storageRequested, "Should have requested storage on initial unit.onStart run.")
+    self.containerMock1:mockDoContentUpdate({{ id = 1331181119, quantity = self.containerMock1.itemsVolume / unitVolume }})
 
     -- intended container finished
     lu.assertStrIContains(self.printOutput, "Registered \"" .. itemName .. "\" to container id: " .. self.container1.getId())
@@ -295,9 +310,9 @@ function _G.TestCollectorUnit:testProcessContainerOptimization()
     self.printOutput = ""
 
     local function callbackFunction()
-        _G.storageAcquired("container1")
+        _G.contentUpdated("container1")
     end
-    self.containerMock1:mockRegisterStorageAcquired(callbackFunction)
+    self.containerMock1:mockRegisterContentUpdate(callbackFunction)
 
     -- use oxygen for 1.0 density
     local optimization = 0.8
@@ -305,12 +320,9 @@ function _G.TestCollectorUnit:testProcessContainerOptimization()
     self.containerMock1.itemsVolume = 20
     self.containerMock1.itemsMass = self.containerMock1.itemsVolume * density * optimization
     local itemName = "Pure Oxygen"
-    local itemJson = string.format(mockContainerUnit.JSON_ITEM_TEMPLATE, "OxygenPure", itemName,
-                         self.containerMock1.itemsVolume, "material", density, 1.0)
-    self.containerMock1.storageJson = "[" .. itemJson .. "]"
 
-    lu.assertTrue(self.containerMock1.storageRequested, "Should have requested storage on initial unit.start run.")
-    self.containerMock1:mockDoStorageAcquired()
+    lu.assertTrue(self.containerMock1.storageRequested, "Should have requested storage on initial unit.onStart run.")
+    self.containerMock1:mockDoContentUpdate({{ id = 947806142, quantity = self.containerMock1.itemsVolume }})
 
     -- intended container finished
     lu.assertStrIContains(self.printOutput, "Registered \"" .. itemName .. "\" to container id: " .. self.container1.getId())
@@ -356,28 +368,23 @@ function _G.TestCollectorUnit:testContainerMultipleItems()
     self.databankMock.data[screwKey] = "[" .. self.container1.getId() .. "]"
 
     local function callbackFunction()
-        _G.storageAcquired("container1")
+        _G.contentUpdated("container1")
     end
-    self.containerMock1:mockRegisterStorageAcquired(callbackFunction)
+    self.containerMock1:mockRegisterContentUpdate(callbackFunction)
 
-    local density = 1.0
-    self.containerMock1.itemsVolume = 20
-    self.containerMock1.itemsMass = self.containerMock1.itemsVolume * density
+    self.containerMock1.itemsVolume = 1
+    self.containerMock1.itemsMass = 1
     local item1Name = "Pure Oxygen"
-    local oxygenJson = string.format(mockContainerUnit.JSON_ITEM_TEMPLATE, "OxygenPure", item1Name,
-                           self.containerMock1.itemsVolume, "material", density, 1.0)
 
-    density = 0.8
-    self.containerMock1.itemsVolume = 20
-    self.containerMock1.itemsMass = self.containerMock1.itemsVolume * density
-    local item2Name = "Xeron Fuel"
-    local xeronJson = string.format(mockContainerUnit.JSON_ITEM_TEMPLATE, "Xeron", item2Name,
-                          self.containerMock1.itemsVolume, "material", density, 1.0)
+    self.containerMock1.itemsVolume = self.containerMock1.itemsVolume + 10.0
+    self.containerMock1.itemsMass = self.containerMock1.itemsMass + 28.95
+    local item2Name = "Basic Hydraulics"
 
-    self.containerMock1.storageJson = "[" .. oxygenJson .. "," .. xeronJson .. "]"
-
-    lu.assertTrue(self.containerMock1.storageRequested, "Should have requested storage on initial unit.start run.")
-    self.containerMock1:mockDoStorageAcquired()
+    lu.assertTrue(self.containerMock1.storageRequested, "Should have requested storage on initial unit.onStart run.")
+    self.containerMock1:mockDoContentUpdate({
+        { id = 947806142, quantity = self.containerMock1.itemsVolume },
+        { id = 1331181119, quantity = self.containerMock1.itemsVolume }
+    })
 
     -- intended container errored out, listing both items of contents
     lu.assertStrIContains(self.printOutput, "Error: Multiple item types in container id " .. self.container1.getId())
@@ -406,9 +413,9 @@ function _G.TestCollectorUnit:testProcessContainerRemap()
     self.databankMock.data[screwKey] = "[" .. self.container1.getId() .. "]"
 
     local function callbackFunction()
-        _G.storageAcquired("container1")
+        _G.contentUpdated("container1")
     end
-    self.containerMock1:mockRegisterStorageAcquired(callbackFunction)
+    self.containerMock1:mockRegisterContentUpdate(callbackFunction)
 
     -- use oxygen for 1.0 density
     local density = 1.0
@@ -416,15 +423,12 @@ function _G.TestCollectorUnit:testProcessContainerRemap()
     self.containerMock1.itemsMass = self.containerMock1.itemsVolume * density
     local itemName = "Pure Oxygen"
     local oxygenKey = itemName:lower() .. ic.constants.CONTAINER_SUFFIX
-    local itemJson = string.format(mockContainerUnit.JSON_ITEM_TEMPLATE, "OxygenPure", itemName,
-                         self.containerMock1.itemsVolume, "material", density, 1.0)
-    self.containerMock1.storageJson = "[" .. itemJson .. "]"
 
     -- preload databank with extra container id for new item
     self.databankMock.data[oxygenKey] = "[" .. 100 .. "]"
 
-    lu.assertTrue(self.containerMock1.storageRequested, "Should have requested storage on initial unit.start run.")
-    self.containerMock1:mockDoStorageAcquired()
+    lu.assertTrue(self.containerMock1.storageRequested, "Should have requested storage on initial unit.onStart run.")
+    self.containerMock1:mockDoContentUpdate({{id = 947806142, quantity = self.containerMock1.itemsVolume }})
 
     -- intended container finished
     lu.assertStrIContains(self.printOutput, "Registered \"" .. itemName .. "\" to container id: " .. self.container1.getId())
@@ -460,17 +464,13 @@ function _G.TestCollectorUnit:testProcessContainerMultiple()
     self.printOutput = ""
 
     local function callbackFunction1()
-        _G.storageAcquired("container1")
+        _G.contentUpdated("container1")
     end
-    self.containerMock1:mockRegisterStorageAcquired(callbackFunction1)
+    self.containerMock1:mockRegisterContentUpdate(callbackFunction1)
     local function callbackFunction2()
-        _G.storageAcquired("container2")
+        _G.contentUpdated("container2")
     end
-    self.containerMock2:mockRegisterStorageAcquired(callbackFunction2)
-
-    -- don't need contents
-    self.containerMock1.storageJson = "[]"
-    self.containerMock2.storageJson = "[]"
+    self.containerMock2:mockRegisterContentUpdate(callbackFunction2)
 
     lu.assertTrue(self.containerMock1.storageRequested ~= self.containerMock2.storageRequested,
         "Should have requested storage on exactly one container.")
@@ -484,7 +484,7 @@ function _G.TestCollectorUnit:testProcessContainerMultiple()
         firstContainer = self.container2
         firstContainerMock = self.containerMock2
     end
-    firstContainerMock:mockDoStorageAcquired()
+    firstContainerMock:mockDoContentUpdate({})
 
     -- first container finished
     lu.assertStrIContains(self.printOutput, "Error: No items in container id " .. firstContainer.getId())
@@ -502,7 +502,7 @@ function _G.TestCollectorUnit:testProcessContainerMultiple()
         secondContainer = self.container1
         secondContainerMock = self.containerMock1
     end
-    secondContainerMock:mockDoStorageAcquired()
+    secondContainerMock:mockDoContentUpdate({})
 
     -- second container finished
     lu.assertStrIContains(self.printOutput, "Error: No items in container id " .. secondContainer.getId())

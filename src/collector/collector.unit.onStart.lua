@@ -5,7 +5,7 @@
 -- Bundled: ${date}
 -- Latest version always available here: https://du.w3asel.com/du-factory-inventory
 
-local waitTime = 30 --export: Time between container scans.
+local waitTime = 31 --export: Time between container scans.
 
 -- localize global lookups
 local slots = {}
@@ -66,27 +66,27 @@ end
 
 -- define functions
 local function processContainer(container)
-    local itemsListJson = container.getItemsList()
-    local itemsList = json.decode(itemsListJson)
+    local itemsList = container.getContent()
 
-    local id = container.getId()
+    local id = container.getLocalId()
     local selfMass = container.getSelfMass()
     local maxVolume = container.getMaxVolume()
 
     InventoryCommon.removeContainerFromDb(slots.databank, id)
 
-    local name, quantity, unitMass, unitVolume, isMaterial
+    local itemData, name, quantity, unitMass, unitVolume, isMaterial
     for _, item in pairs(itemsList) do
+        itemData = system.getItem(item.id)
         if name then
-            debugPrint(string.format("Error: Multiple item types in container id %d: %s, %s, ...", id, name, item.name));
+            debugPrint(string.format("Error: Multiple item types in container id %d: %s, %s, ...", id, name, itemData.displayName));
             containerStatus[container].complete = true
             return
         else
-            name = string.lower(item.name)
+            name = string.lower(itemData.displayName)
             quantity = item.quantity
-            unitMass = item.unitMass
-            unitVolume = item.unitVolume
-            isMaterial = item.type == "material"
+            unitMass = itemData.unitMass
+            unitVolume = itemData.unitVolume
+            isMaterial = itemData.type == "material"
         end
     end
     if not name then
@@ -129,9 +129,9 @@ local function processContainer(container)
 end
 
 function _G.updateTick()
-    for slot, container in pairs(slots.containers) do
+    for _, container in pairs(slots.containers) do
         if not containerStatus[container].available then
-            container.acquireStorage()
+            container.updateContent()
             break
         end
     end
@@ -154,7 +154,7 @@ function _G.updateTick()
     end
 end
 
-function _G.storageAcquired(slot)
+function _G.contentUpdated(slot)
     containerStatus[slots.containers[slot]].available = true
 
     _G.updateTick()

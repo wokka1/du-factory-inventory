@@ -25,8 +25,8 @@ slots.core = core
 -- validate inputs
 local screenIndex = 1
 for slot, _ in pairs(slots.displays) do
-    assert(slot.getElementClass() == "ScreenUnit",
-        string.format("Display slot %d is invalid type: %s", screenIndex, slot.getElementClass()))
+    assert(slot.getClass() == "ScreenUnit",
+        string.format("Display slot %d is invalid type: %s", screenIndex, slot.getClass()))
     slot.activate()
     screenIndex = screenIndex + 1
 end
@@ -45,7 +45,7 @@ end
 slots.databank = Utilities.loadSlot(slots.databank, "DataBankUnit", nil, module, "databank", true, databankOptionalMsg)
 
 -- hide widget
-unit.hide()
+unit.hideWidget()
 
 -- define display constants and functions
 local STYLE_TEMPLATE = [[
@@ -400,7 +400,7 @@ local function updateData()
 
         for _, containerId in pairs(containerIdList) do
             -- remove container ids that aren't in core.getElementIdList
-            if slots.core.getElementTypeById(containerId) == "" then
+            if slots.core.getElementDisplayNameById(containerId) == "" then
                 InventoryCommon.removeContainerFromDb(slots.databank, containerId)
                 system.print(string.format("Container %d not found in core lookup, removing from databank...", containerId))
                 goto continueContainerId
@@ -440,7 +440,7 @@ local function updateData()
     -- gather data by industry scanning
     if slots.core then
         for _, id in pairs(slots.core.getElementIdList()) do
-            -- system.print(id .. ": " .. slots.core.getElementNameById(id) .. ": " .. slots.core.getElementTypeById(id))
+            -- system.print(id .. ": " .. slots.core.getElementNameById(id) .. ": " .. slots.core.getElementDisplayNameById(id))
 
             elementsRead = elementsRead + 1
             if elementsRead % elementsReadPerUpdate == 0 then

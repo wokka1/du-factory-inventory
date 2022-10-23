@@ -11,17 +11,19 @@
         "8":{"name":"databank","type":{"events":[],"methods":[]}},
         "9":{"name":"core","type":{"events":[],"methods":[]}},
         "-1":{"name":"unit","type":{"events":[],"methods":[]}},
-        "-2":{"name":"system","type":{"events":[],"methods":[]}},
-        "-3":{"name":"library","type":{"events":[],"methods":[]}}
+        "-2":{"name":"construct","type":{"events":[],"methods":[]}},
+        "-3":{"name":"player","type":{"events":[],"methods":[]}},
+        "-4":{"name":"system","type":{"events":[],"methods":[]}},
+        "-5":{"name":"library","type":{"events":[],"methods":[]}}
     },
     "handlers":[
-        {"code":"${file:screen/honest-vifs.row1.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:row1}"},"key":"${key}"},
-        {"code":"${file:screen/honest-vifs.row2.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:row2}"},"key":"${key}"},
-        {"code":"${file:display.unit.start.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:unit}"},"key":"${key}"},
-        {"code":"${code:_G.resumeWork(true)}","filter":{"args":[],"signature":"update()","slotKey":"${slotKey:system}"},"key":"${key}"},
-        {"code":"${file:display.unit.stop.lua}","filter":{"args":[],"signature":"stop()","slotKey":"${slotKey:unit}"},"key":"${key}"},
-        {"code":"${file:../common/Utilities.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:library}"},"key":"${key}"},
-        {"code":"${file:../common/InventoryCommon.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:library}"},"key":"${key}"}
+        {"code":"${file:screen/honest-vifs.row1.lua}","filter":{"args":[],"signature":"onStart()","slotKey":"${slotKey:row1}"},"key":"${key}"},
+        {"code":"${file:screen/honest-vifs.row2.lua}","filter":{"args":[],"signature":"onStart()","slotKey":"${slotKey:row2}"},"key":"${key}"},
+        {"code":"${file:display.unit.onStart.lua}","filter":{"args":[],"signature":"onStart()","slotKey":"${slotKey:unit}"},"key":"${key}"},
+        {"code":"${code:_G.resumeWork(true)}","filter":{"args":[],"signature":"onUpdate()","slotKey":"${slotKey:system}"},"key":"${key}"},
+        {"code":"${file:display.unit.onStop.lua}","filter":{"args":[],"signature":"onStop()","slotKey":"${slotKey:unit}"},"key":"${key}"},
+        {"code":"${file:../common/Utilities.lua}","filter":{"args":[],"signature":"onStart()","slotKey":"${slotKey:library}"},"key":"${key}"},
+        {"code":"${file:../common/InventoryCommon.lua}","filter":{"args":[],"signature":"onStart()","slotKey":"${slotKey:library}"},"key":"${key}"}
     ],
     "methods":[],
     "events":[]

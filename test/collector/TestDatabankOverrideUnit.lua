@@ -1,5 +1,5 @@
 #!/usr/bin/env lua
---- Tests for databank override unit.start.
+--- Tests for databank override unit.onStart.
 
 package.path = "src/?.lua;" .. package.path -- add src directory
 package.path = package.path .. ";../du-mocks/src/?.lua" -- add fallback to du-mocks project (if not installed on path)
@@ -12,7 +12,7 @@ local ic = require("common.InventoryCommon")
 _G.json = require("dkjson")
 
 -- load file into a function for efficient calling
-local unitStart = loadfile("./src/collector/databankoverride.unit.start.lua")
+local unitStart = loadfile("./src/collector/databankoverride.unit.onStart.lua")
 
 local mockDatabankUnit = require("dumocks.DatabankUnit")
 local mockControlUnit = require("dumocks.ControlUnit")
@@ -44,7 +44,7 @@ function _G.TestDatabankOverrideUnit:setup()
     }
 end
 
---- Unset all globals set/used by unit.start.
+--- Unset all globals set/used by unit.onStart.
 function _G.TestDatabankOverrideUnit:teardown()
     _G.databank = nil
     _G.screen = nil

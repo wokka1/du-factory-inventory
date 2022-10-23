@@ -1,5 +1,5 @@
 #!/usr/bin/env lua
---- Tests for collector unit.start.
+--- Tests for collector unit.onStart.
 
 package.path = "src/?.lua;" .. package.path -- add src directory
 package.path = package.path .. ";../du-mocks/src/?.lua" -- add fallback to du-mocks project (if not installed on path)
@@ -12,7 +12,7 @@ local ic = require("common.InventoryCommon")
 _G.json = require("dkjson")
 
 -- load file into a function for efficient calling
-local unitStart = loadfile("./src/display/display.unit.start.lua")
+local unitStart = loadfile("./src/display/display.unit.onStart.lua")
 
 local mockControlUnit = require("dumocks.ControlUnit")
 local mockCoreUnit = require("dumocks.CoreUnit")
@@ -49,7 +49,7 @@ function _G.TestDisplayUnit:setup()
     }
 end
 
---- Unset all globals set/used by unit.start.
+--- Unset all globals set/used by unit.onStart.
 function _G.TestDisplayUnit:teardown()
     _G.core = nil
     _G.databank = nil

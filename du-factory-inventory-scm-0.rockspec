@@ -1,7 +1,7 @@
 package = "du-factory-inventory"
 version = "scm-0"
 source = {
-   url = "git://github.com/1337joe/du-factory-inventory",
+   url = "git+https://github.com/1337joe/du-factory-inventory",
    branch = "main",
 }
 description = {
