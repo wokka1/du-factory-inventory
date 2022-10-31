@@ -1,14 +1,14 @@
 local screenConfig = {
     vertical = true,
-    titleFontSize = 75,
-    titleHeight = 100,
-    headerRuleHeight = 5,
-    fontSize = 45,
-    xPadding = 20,
-    tableXPadding = 10,
-    rowHeight = 50,
-    rowPadding = 10,
-    countOffset = -150,
+    titleFontSize = 40,
+    titleHeight = 55,
+    headerRuleHeight = 2,
+    fontSize = 24,
+    xPadding = 5,
+    tableXPadding = 2,
+    rowHeight = 27,
+    rowPadding = 5,
+    countOffset = -80,
     columns = 2,
     tables = {}
 }
@@ -26,7 +26,7 @@ screenConfig.tables[#screenConfig.tables + 1] = {
 screenConfig.tables[#screenConfig.tables + 1] = {
     title = "Intermediate",
     columns = {"Screw"},
-    countOffset = 100,
+    countOffset = 50,
     rows = {
         {{name = "Basic Screw", label="", targetCount = 1200}},
         {{name = "Uncommon Screw", label="", targetCount = 800}},
@@ -45,7 +45,7 @@ screenConfig.tables[#screenConfig.tables + 1] = {
 }
 screenConfig.tables[#screenConfig.tables + 1] = {
     columns = {"Pipe"},
-    countOffset = 100,
+    countOffset = 50,
     rows = {
         {{name = "Basic Pipe", label="", targetCount = 800}},
         {{name = "Uncommon Pipe", label="", targetCount = 400}},
@@ -64,7 +64,7 @@ screenConfig.tables[#screenConfig.tables + 1] = {
 }
 screenConfig.tables[#screenConfig.tables + 1] = {
     columns = {"Component", "Connector"},
-    countOffset = 100,
+    countOffset = 50,
     rows = {
         {{name = "Basic Component", label="", targetCount = 800}, {name = "Basic Connector", label="", targetCount = 400}},
         {{name = "Uncommon Component", label="", targetCount = 400}, {name = "Uncommon Connector", label="", targetCount = 400}},
@@ -83,7 +83,7 @@ screenConfig.tables[#screenConfig.tables + 1] = {
 }
 screenConfig.tables[#screenConfig.tables + 1] = {
     columns = {"Fixation"},
-    countOffset = 100,
+    countOffset = 50,
     rows = {
         {{name = "Basic Fixation", label="", targetCount = 400}},
         {{name = "Uncommon Fixation", label="", targetCount = 400}},
@@ -102,7 +102,7 @@ screenConfig.tables[#screenConfig.tables + 1] = {
 }
 screenConfig.tables[#screenConfig.tables + 1] = {
     columns = {"LED"},
-    countOffset = 100,
+    countOffset = 50,
     rows = {
         {{name = "Basic LED", label="", targetCount = 400}},
         {{name = "Uncommon LED", label="", targetCount = 400}},

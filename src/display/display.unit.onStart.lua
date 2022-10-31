@@ -48,274 +48,15 @@ slots.databank = Utilities.loadSlot(slots.databank, "DataBankUnit", nil, module,
 unit.hideWidget()
 
 -- define display constants and functions
-local STYLE_TEMPLATE = [[
-<style>
-text {
-    font-size: %.0fpx;
-    fill: white;
-    font-family: Arial;
-    text-transform: none;
-}
-text.blockTitle {
-    font-size: %.0fpx;
-    text-anchor: middle;
-}
-.empty .label {
-    fill: #777;
-}
-.full text {
-    fill: black;
-}
-.full .label {
-    fill: #333;
-}
-.fG, .fG text {
-    fill: green;
-}
-.fY, .fY text {
-    fill: yellow;
-}
-.fR, .fR text {
-    fill: red;
-}
-rect.headerRule {
-    fill: white;
-}
-</style>
-]]
-local function generateStyle(screenConfig)
-    return string.format(STYLE_TEMPLATE, screenConfig.fontSize, screenConfig.titleFontSize)
-end
-
-local ROW_TEMPLATE = [[
-<g transform="translate(%.1f,%.1f)">
-    <defs>
-        <clipPath id="pc%d">
-            <rect x="%.1f" y="0" width="1920" height="1920" />
-        </clipPath>
-    </defs>
-    <g class="empty %s">
-        <text x="$leftText" y="$textHeight">%s</text>
-        <text x="$countOffset" y="$textHeight" text-anchor="end">%s</text>
-        <text x="$countOffset" y="$textHeight" class="label">%s</text>
-        <text x="$rightText" y="$textHeight" text-anchor="end">%.0f<tspan class="label">%%</tspan></text>
-    </g>
-    <g class="full" clip-path="url(#pc%d)">
-        <rect x="0" y="0" width="%.1f" height="%.1f" class="%s"/>
-        <text x="$leftText" y="$textHeight">%s</text>
-        <text x="$countOffset" y="$textHeight" text-anchor="end">%s</text>
-        <text x="$countOffset" y="$textHeight" class="label">%s</text>
-        <text x="$rightText" y="$textHeight" text-anchor="end">%.0f<tspan class="label">%%</tspan></text>
-    </g>
-</g>
-]]
-local rowClassIndex = 0
-local function generateRowCell(item, itemConfig, itemData, xStart, yStart, width, height, countOffset)
-    rowClassIndex = rowClassIndex + 1
-
-    local itemName, itemLabel
-    if type(item) == "table" then
-        itemName = string.lower(item.name)
-        itemLabel = item.label or item.name
-    else
-        itemName = string.lower(item)
-        itemLabel = item
-    end
-
-    local itemResults = itemData[itemName] or {}
-    local units = ""
-    local count = 0
-    local maxCount = 1
-    local countError = false
-
-    -- determine data source based on configuration, fall back to first available data if not specified
-    if itemConfig.source == InventoryCommon.constants.SOURCE_CONTAINER_VOLUME_ONLY then
-        if slots.containers and slots.containers[itemName] and slots.containers[itemName].getItemsVolume then
-            units = "L"
-            count = slots.containers[itemName].getItemsVolume()
-            maxCount = slots.containers[itemName].getMaxVolume()
-            countError = false
-        else
-            system.print("Container link not found for " .. itemName)
-            countError = true
-        end
-    elseif itemConfig.source == InventoryCommon.constants.SOURCE_CORE_CONTAINER or (not itemConfig.source and itemResults.containerData) then
-        units = itemResults.units
-        count = itemResults.containerItems
-        maxCount = itemResults.containerMaxItems
-        countError = itemResults.containerError
-    end
-
-    if itemConfig.targetCount then
-        maxCount = itemConfig.targetCount
-    end
-
-    local percent = count / maxCount
-
-    local barColor
-    if itemConfig.reverse then
-        if percent > 0.9 then
-            barColor = "fR"
-        elseif percent > 0.5 then
-            barColor = "fY"
-        else
-            barColor = "fG"
-        end
-    else
-        if percent > 0.5 then
-            barColor = "fG"
-        elseif percent > 0.1 then
-            barColor = "fY"
-        else
-            barColor = "fR"
-        end
-    end
-
-    local printableCount, countUnits = Utilities.printableNumber(count, units)
-    local printablePercent = math.floor(percent * 100 + 0.5)
-
-    -- TODO show/test error
-
-    local rowSvg = string.format(ROW_TEMPLATE, xStart, yStart,
-               rowClassIndex, (1 - percent) * width, barColor, itemLabel, printableCount, countUnits,
-               printablePercent, rowClassIndex, width, height, barColor, itemLabel, printableCount, countUnits, printablePercent)
-
-    rowSvg = string.gsub(rowSvg, "$textHeight", height * 3 / 4)
-    rowSvg = string.gsub(rowSvg, "$leftText", 5)
-    if countOffset < 0 then
-        rowSvg = string.gsub(rowSvg, "$countOffset", width + countOffset - 5)
-    else
-        rowSvg = string.gsub(rowSvg, "$countOffset", 5 + countOffset)
-    end
-    rowSvg = string.gsub(rowSvg, "$rightText", width - 5)
-
-    return rowSvg
-end
-
-local function inheritConfig(parentConfig, childConfig)
-    local resultConfig = {}
-    for key, value in pairs(parentConfig) do
-        if type(value) ~= "table" then
-            resultConfig[key] = value
-        end
-    end
-
-    if type(childConfig) == "table" then
-        for key, value in pairs(childConfig) do
-            if type(value) ~= "table" then
-                resultConfig[key] = value
-            end
-        end
-    end
-
-    return resultConfig
-end
-
-local function generateTable(table, tableConfig, xOffset, yOffset, width, itemData)
-    local title = table.title
-
-    local document = ""
-    if title then
-        document = string.format([[<text class="blockTitle" x="%.1f" y="%.1f">%s</text>]], xOffset + width / 2, yOffset + tableConfig.titleHeight * 3 / 4, title)
-        yOffset = yOffset + tableConfig.titleHeight
-    end
-
-    local columns
-    if type(table.columns) == "table" then
-        columns = #table.columns
-    else
-        columns = table.columns or 1
-    end
-    local columnXPadding = tableConfig.xPadding or tableConfig.xPadding or 0
-
-    local columnWidth = (width - (columns - 1) * columnXPadding) / columns
-    local rowHeight = table.rowHeight or tableConfig.rowHeight
-    local rowPadding = table.rowPadding or tableConfig.rowPadding
-
-    if type(table.columns) == "table" then
-        for i, columnHeader in pairs(table.columns) do
-            local headerX = xOffset + (i - 1) * (columnWidth + columnXPadding) + columnWidth / 2
-            document = document .. string.format([[<text x="%.1f" y="%.1f" text-anchor="middle">%s</text>]], headerX, yOffset + tableConfig.rowHeight * 3 / 4, columnHeader)
-        end
-        yOffset = yOffset + rowHeight
-        document = document .. string.format([[<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" class="headerRule"/>]], xOffset, yOffset, width, tableConfig.headerRuleHeight)
-        yOffset = yOffset + tableConfig.headerRuleHeight
-    end
-
-    for _, row in pairs(table.rows) do
-        local rowConfig = inheritConfig(tableConfig, row)
-
-        local column = 0
-        for _, item in pairs(row) do
-            local itemConfig = inheritConfig(rowConfig, item)
-
-            local rowX = xOffset + column * (columnWidth + columnXPadding)
-            document = document .. generateRowCell(item, itemConfig, itemData, rowX, yOffset, columnWidth, rowHeight, tableConfig.countOffset)
-
-            column = column + 1
-        end
-
-        yOffset = yOffset + rowHeight + rowPadding
-    end
-
-    return document, yOffset
-end
+local RENDER_SCRIPT = [[${file:display.screen.lua}]]
 
 local function populateScreen(screen, screenConfig, itemData)
-    local document = [[<svg viewbox="0 0 1920 1145" style="width:100%;height:100%;" class="bootstrap" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="none">]]
-
-    document = document .. generateStyle(screenConfig)
-
-    local height, width, rotateString
-    if screenConfig.vertical then
-        height = 1920
-        width = 1145
-        document = document .. [[<g transform="translate(0,1145) rotate(-90)">]]
-    else
-        height = 1145
-        width = 1920
-    end
-
-    local yOffset = 0
-    local maxYOffset = 0
-
-    local columns = screenConfig.columns or 1
-    local columnWidth = (width - (columns - 1) * screenConfig.xPadding) / columns
-    local column = 0
-
-    for _, table in pairs(screenConfig.tables) do
-        local tableConfig = inheritConfig(screenConfig, table)
-
-        local xOffset = screenConfig.xPadding + column * columnWidth + math.max(0, column - 1) * screenConfig.xPadding
-
-        local colspan = tableConfig.colspan or 1
-        local tableWidth = (width - screenConfig.xPadding) / columns * colspan - screenConfig.xPadding
-
-        local tableElement, tableYEnd = generateTable(table, tableConfig, xOffset, yOffset, tableWidth, itemData)
-        document = document .. tableElement
-        maxYOffset = math.max(maxYOffset, tableYEnd)
-        column = column + colspan
-
-        if column >= columns then
-            yOffset = maxYOffset
-            maxYOffset = 0
-            column = 0
-        end
-    end
-
-    if screenConfig.vertical then
-        document = document .. [[</g>]]
-    end
-    document = document .. "</svg>"
-
-    -- TODO minify silently, more effectively
-    if document:len() > 50000 then
-        system.print("Document too large (" .. document:len() .. "), minifying")
-        document = string.gsub(document, "%s%s+", " ")
-        system.print("Reduced to: " .. document:len())
-    end
-
-    screen.setHTML(document)
+    local script = string.format([=[
+        local screenConfig = load(%q)()
+        local itemData = load(%q)()
+        %s]=],
+        "return " .. serialize(screenConfig), "return " .. serialize(itemData), RENDER_SCRIPT)
+    screen.setRenderScript(script)
 end
 
 -- define data gathering functions
@@ -345,14 +86,27 @@ function ItemReport:new(o)
 
     o.units = ""
 
-    o.containerData = false
+    -- o.containerData = false
     o.containerItems = 0
     o.containerMaxItems = 0
-    o.containerError = false
+    o.containerError = nil
 
     return o
 end
 local gatheredItems = {}
+
+local function scanContainer(itemData, report)
+    local name = itemData.name
+    if slots.containers and slots.containers[name] and slots.containers[name].getItemsVolume then
+        report.units = "L"
+        report.containerItems = slots.containers[name].getItemsVolume()
+        report.containerMaxItems = slots.containers[name].getMaxVolume()
+        report.containerError = nil
+    else
+        system.print("Container link not found for " .. name)
+        report.containerError = true
+    end
+end
 
 local resumeOnUpdate = true
 local function updateData()
@@ -363,7 +117,12 @@ local function updateData()
             for _, row in pairs(table.rows) do
                 for _, item in pairs(row) do
                     if type(item) == "table" then
-                        gatheredItems[string.lower(item.name)] = ItemReport:new(item)
+                        local report = ItemReport:new(item)
+                        gatheredItems[string.lower(item.name)] = report
+
+                        if item.source == InventoryCommon.constants.SOURCE_CONTAINER_VOLUME_ONLY then
+                            scanContainer(item, report)
+                        end
                     elseif type(item) == "string" then
                         gatheredItems[string.lower(item)] = ItemReport:new()
                     else
@@ -421,7 +180,7 @@ local function updateData()
             end
 
             data.units = itemUnits
-            data.containerData = true
+            -- data.containerData = true
             data.containerItems = data.containerItems + itemCount
             data.containerMaxItems = data.containerMaxItems + maxItems
             data.containerError = data.containerError or math.abs(itemCount - math.floor(itemCount)) > maxMassError
@@ -436,6 +195,8 @@ local function updateData()
 
         ::continueContainers::
     end
+
+    -- gather data by container links
 
     -- gather data by industry scanning
     if slots.core then

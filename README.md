@@ -89,6 +89,8 @@ If you don't have a Lua runtime set up the easiest solution is to copy from the 
 
 Luarocks can be used to install all dependencies: `luarocks install --only-deps du-factory-inventory-scm-0.rockspec`
 
+* [du-serializer](https://github.com/EliasVilld/du-serializer): For serializing data to displays. Included as a git subtree at libraries/du-serializer.
+
 * dkjson - Used for testing of json data and for json serialization/deserialization in-game. This will fall back to (from the project root) `../game-data-lua` if dkjson isn't installed.
 
 * Dual Universe/Game/data/lua: For automated testing without installing dkjson, link or copy your C:\ProgramData\Dual Universe\Game\data\lua directory to ../game-data-lua relative to within the root directory of the project.
