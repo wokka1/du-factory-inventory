@@ -68,9 +68,14 @@ local function drawRow(layer, barColor, textColor, labelColor, xStart, yStart, w
     local printablePercent = math.floor(percent * 100 + 0.5)
     percent = math.min(1, percent)
 
+    local canCreateLayers = getRenderCostMax() - getRenderCost() > 150000
+    if not canCreateLayers then
+        textColor = labelColor
+    end
+
     if barColor then
         -- new layer to allow for clipping
-        if percent < 1 then
+        if percent < 1 and canCreateLayers then
             layer = createLayer()
             applyTransformation(layer)
 

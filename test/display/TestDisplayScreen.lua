@@ -98,6 +98,13 @@ function _G.TestDisplayScreen:renderConfiguration(name, configuration)
 
     prefix = prefix + 1
     local renderScript = rs:new(nil, 1024, 613, prefix)
+
+    renderScript.fontStrings = {
+        ["Play-Bold"] = {
+            ["%"] = {20.625 / 20, 18.125 / 20},
+        }
+    }
+
     local environment = renderScript:mockGetEnvironment()
 
     environment.constants = InventoryCommon.constants
@@ -190,11 +197,13 @@ function _G.TestDisplayScreen:testHonestVifsRow2()
 end
 
 function _G.TestDisplayScreen:testScreenOutput()
-    lu.skip("Placeholder for running renderscript from in-game")
     local renderScript = rs:new()
     local environment = renderScript:mockGetEnvironment()
 
-    local script = assert(loadfile(SCREEN_DIR .. "test.lua", "t", environment))
+    local script, message = loadfile(SCREEN_DIR .. "test.lua", "t", environment)
+    if not script then
+        lu.skip("Failed to load test.lua: " .. message)
+    end
 
     script()
 
