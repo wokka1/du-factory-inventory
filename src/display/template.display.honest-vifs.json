@@ -24,7 +24,7 @@
         {"code":"${file:display.unit.onStop.lua}","filter":{"args":[],"signature":"onStop()","slotKey":"${slotKey:unit}"},"key":"${key}"},
         {"code":"${file:../common/Utilities.lua}","filter":{"args":[],"signature":"onStart()","slotKey":"${slotKey:library}"},"key":"${key}"},
         {"code":"${file:../common/InventoryCommon.lua}","filter":{"args":[],"signature":"onStart()","slotKey":"${slotKey:library}"},"key":"${key}"},
-        {"code":"${file:../../libraries/du-serializer/serializer.lua}","filter":{"args":[],"signature":"onStart()","slotKey":"${slotKey:library}"},"key":"${key}"}
+        {"code":"-- From: https://github.com/EliasVilld/du-serializer\n${file:../../libraries/du-serializer/serializer.lua}","filter":{"args":[],"signature":"onStart()","slotKey":"${slotKey:library}"},"key":"${key}"}
     ],
     "methods":[],
     "events":[]
