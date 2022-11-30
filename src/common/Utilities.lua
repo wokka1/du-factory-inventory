@@ -34,7 +34,6 @@ function _G.Utilities.printableNumber(value, units)
     return string.format("%.0f", sign * math.floor(adjustedValue + 0.5)), SI_PREFIXES[factor] .. units
 end
 
-
 --- Finds the first slot on 'unit' that has element class 'slotClass' and is not listed in the exclude list.
 -- @tparam string slotClass The element class pattern of the target slot. May instead be a table containing a list of
 --   class names.

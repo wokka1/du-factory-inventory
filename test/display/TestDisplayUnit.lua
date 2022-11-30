@@ -1,5 +1,5 @@
 #!/usr/bin/env lua
---- Tests for collector unit.onStart.
+--- Tests for display unit.onStart.
 
 package.path = "src/?.lua;" .. package.path -- add src directory
 package.path = package.path .. ";../du-mocks/src/?.lua" -- add fallback to du-mocks project (if not installed on path)

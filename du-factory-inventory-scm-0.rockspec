@@ -17,7 +17,7 @@ dependencies = {
    -- build/test dependencies
    "luaunit",
    "luacov",
-   "du-mocks",
+   "du-mocks >= 1.0.0",
    "du-bundler",
 }
 build = {
