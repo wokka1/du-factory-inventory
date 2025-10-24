@@ -1,6 +1,7 @@
 #!/usr/bin/env lua
 --- Tests for Utilities.
 
+package.path = "src/?.lua;" .. package.path -- add src directory
 package.path = package.path .. ";../du-mocks/src/?.lua" -- add fallback to du-mocks project (if not installed on path)
 
 local lu = require("luaunit")
@@ -22,7 +23,7 @@ function _G.TestUtilities.testPrintableNumberUnits()
 
     for i=1,30 do
         expected = BIG_PREFIXES[math.min(math.floor(i / 3) + 1, #BIG_PREFIXES)]
-        value = math.pow(10, i)
+        value = 10 ^ i
         _,actual = ut.printableNumber(value, "")
         lu.assertEquals(actual, expected, "Prefix for: "..value)
     end
@@ -34,7 +35,7 @@ function _G.TestUtilities.testPrintableNumberUnitsNegative()
 
     for i=1,30 do
         expected = BIG_PREFIXES[math.min(math.floor(i / 3) + 1, #BIG_PREFIXES)]
-        value = -math.pow(10, i)
+        value = -(10 ^ i)
         _,actual = ut.printableNumber(value, "")
         lu.assertEquals(actual, expected, "Prefix for: "..value)
     end
@@ -297,37 +298,42 @@ function _G.TestUtilities.testFindFirstSlot()
     lu.assertNil(actualSlot)
 
     -- found, single choice
-    actual, actualSlot = _G.Utilities.findFirstSlot(databank.getElementClass());
+    actual, actualSlot = _G.Utilities.findFirstSlot(databank.getClass());
+    lu.assertIs(actual, databank)
+    lu.assertEquals(actualSlot, "databank")
+
+    -- found by pattern match, single choice
+    actual, actualSlot = _G.Utilities.findFirstSlot("DataBank%a+");
     lu.assertIs(actual, databank)
     lu.assertEquals(actualSlot, "databank")
 
     -- found: choice of two - slot order does not matter in-game, don't rely on it here
-    actual, actualSlot = _G.Utilities.findFirstSlot(screen1.getElementClass());
+    actual, actualSlot = _G.Utilities.findFirstSlot(screen1.getClass());
     lu.assertNotNil(actual)
     lu.assertNotNil(actualSlot)
-    lu.assertEquals(actual.getElementClass(), screen1.getElementClass())
+    lu.assertEquals(actual.getClass(), screen1.getClass())
 
     -- fail to find due to exclusion
-    actual, actualSlot = _G.Utilities.findFirstSlot(databank.getElementClass(), {databank});
+    actual, actualSlot = _G.Utilities.findFirstSlot(databank.getClass(), {databank});
     lu.assertNil(actual)
     lu.assertNil(actualSlot)
 
     -- find specific due to exclusion
-    actual, actualSlot = _G.Utilities.findFirstSlot(screen1.getElementClass(), {screen1});
+    actual, actualSlot = _G.Utilities.findFirstSlot(screen1.getClass(), {screen1});
     lu.assertIs(actual, screen2)
     lu.assertEquals(actualSlot, "screen2")
-    actual, actualSlot = _G.Utilities.findFirstSlot(screen1.getElementClass(), {screen2});
+    actual, actualSlot = _G.Utilities.findFirstSlot(screen1.getClass(), {screen2});
     lu.assertIs(actual, screen1)
     lu.assertEquals(actualSlot, "screen1")
 
     -- find from a list of search types, use exclusion to get testable result
-    actual, actualSlot = _G.Utilities.findFirstSlot({core.getElementClass(), databank.getElementClass()}, {core});
+    actual, actualSlot = _G.Utilities.findFirstSlot({core.getClass(), databank.getClass()}, {core});
     lu.assertIs(actual, databank)
     lu.assertEquals(actualSlot, "databank")
-    actual, actualSlot = _G.Utilities.findFirstSlot({core.getElementClass(), databank.getElementClass()}, {databank});
+    actual, actualSlot = _G.Utilities.findFirstSlot({core.getClass(), databank.getClass()}, {databank});
     lu.assertIs(actual, core)
     lu.assertEquals(actualSlot, "core")
-    actual, actualSlot = _G.Utilities.findFirstSlot({core.getElementClass(), databank.getElementClass()}, {core, databank});
+    actual, actualSlot = _G.Utilities.findFirstSlot({core.getClass(), databank.getClass()}, {core, databank});
     lu.assertNil(actual)
     lu.assertNil(actualSlot)
 end

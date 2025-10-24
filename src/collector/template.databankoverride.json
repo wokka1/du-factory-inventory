@@ -11,13 +11,15 @@
         "8":{"name":"slot9","type":{"events":[],"methods":[]}},
         "9":{"name":"slot10","type":{"events":[],"methods":[]}},
         "-1":{"name":"unit","type":{"events":[],"methods":[]}},
-        "-2":{"name":"system","type":{"events":[],"methods":[]}},
-        "-3":{"name":"library","type":{"events":[],"methods":[]}}
+        "-2":{"name":"construct","type":{"events":[],"methods":[]}},
+        "-3":{"name":"player","type":{"events":[],"methods":[]}},
+        "-4":{"name":"system","type":{"events":[],"methods":[]}},
+        "-5":{"name":"library","type":{"events":[],"methods":[]}}
     },
     "handlers":[
-        {"code":"${file:databankoverride.unit.start.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:unit}"},"key":"${key}"},
-        {"code":"${file:../common/Utilities.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:library}"},"key":"${key}"},
-        {"code":"${file:../common/InventoryCommon.lua}","filter":{"args":[],"signature":"start()","slotKey":"${slotKey:library}"},"key":"${key}"}
+        {"code":"${file:databankoverride.unit.onStart.lua}","filter":{"args":[],"signature":"onStart()","slotKey":"${slotKey:unit}"},"key":"${key}"},
+        {"code":"${file:../common/Utilities.lua}","filter":{"args":[],"signature":"onStart()","slotKey":"${slotKey:library}"},"key":"${key}"},
+        {"code":"${file:../common/InventoryCommon.lua}","filter":{"args":[],"signature":"onStart()","slotKey":"${slotKey:library}"},"key":"${key}"}
     ],
     "methods":[],
     "events":[]

@@ -1,6 +1,7 @@
 #!/usr/bin/env lua
 --- Tests for InventoryCommon.
 
+package.path = "src/?.lua;" .. package.path -- add src directory
 package.path = package.path .. ";../du-mocks/src/?.lua" -- add fallback to du-mocks project (if not installed on path)
 package.path = package.path .. ";../game-data-lua/?.lua" -- add fallback for dkjson (if not installed on path)
 
@@ -187,14 +188,14 @@ function _G.TestInventoryCommon.testValidateDb()
     local hackedDatabank = {
         getStringValue = databank.getStringValue
     }
-    function hackedDatabank.getKeys()
+    function hackedDatabank.getKeyList()
         local keysList = {}
         for key,_ in pairs(databankMock.data) do
             for i = 1, databankMock.data[key] do
-                keysList[#keysList + 1] = string.format([["%s"]], key)
+                keysList[#keysList + 1] = string.format("%s", key)
             end
         end
-        return "[" .. table.concat(keysList, ",") .. "]"
+        return keysList
     end
 
     systemPrint = ""

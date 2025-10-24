@@ -33,7 +33,7 @@ Configurable, screen-based factory inventory monitor.
 1. Install the display programming board and copy the [base display script](https://du.w3asel.com/du-factory-inventory/templates/template.display.base.json) to it. Make sure you copy the raw data, not your browser's JSON formatted page.
     1. You should get a "Lua script loaded" confirmation message. If this is not the case try pasting the JSON in notepad to confirm that the right data is in the clipboard.
 2. Link the named slots to the appropriate elements: Core, Databank, and Manual Switch if using one to turn on the programming board (use the link tool right-click -> Select an OUT plug to link to... option to specify what link is used). Alternately, you can use [this version of the script](https://du.w3asel.com/du-factory-inventory/templates/template.display.blank.json) and link any slot to any element for it to autodetect slot assignment on startup, though you'll still need to track which slots are used for what displays as detailed in the next step.
-3. Select the desired templates to add from the [display/screen](display/screen) directory. **TODO create and link to template images page**
+3. Select the desired templates to add from the [src/display/screen](src/display/screen) directory. **TODO create and link to template images page**
     1. Link a display to put the template on to the programming board.
     2. Open the programming board (right-click -> Advanced -> Edit Lua script) and select the slot that links the new display. You may want to rename the slot for clarity, but make sure you don't add spaces or punctuation in the slot name.
     3. Click "+ Add Filter" at the bottom of the filter panel, then mouse over the three dots to the left of the filter and select "start".
@@ -57,7 +57,7 @@ Configurable, screen-based factory inventory monitor.
 
 ## Display Templates
 
-Template documentation isn't a priority while I'm actively developing, for now look through examples in [display/screen](display/screen).
+Template documentation isn't a priority while I'm actively developing, for now look through examples in [src/display/screen](src/display/screen).
 
 **TODO detail this, provide sample template with all options specified**
 
@@ -88,6 +88,8 @@ If you don't have a Lua runtime set up the easiest solution is to copy from the 
 ## Developer Dependencies
 
 Luarocks can be used to install all dependencies: `luarocks install --only-deps du-factory-inventory-scm-0.rockspec`
+
+* [du-serializer](https://github.com/EliasVilld/du-serializer): For serializing data to displays. Included as a git subtree at libraries/du-serializer.
 
 * dkjson - Used for testing of json data and for json serialization/deserialization in-game. This will fall back to (from the project root) `../game-data-lua` if dkjson isn't installed.
 

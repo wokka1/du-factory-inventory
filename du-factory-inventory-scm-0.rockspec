@@ -1,7 +1,7 @@
 package = "du-factory-inventory"
 version = "scm-0"
 source = {
-   url = "git://github.com/1337joe/du-factory-inventory",
+   url = "git+https://github.com/1337joe/du-factory-inventory",
    branch = "main",
 }
 description = {
@@ -17,7 +17,7 @@ dependencies = {
    -- build/test dependencies
    "luaunit",
    "luacov",
-   "du-mocks",
+   "du-mocks >= 1.0.0",
    "du-bundler",
 }
 build = {

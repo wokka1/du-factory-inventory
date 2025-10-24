@@ -31,15 +31,17 @@ function _G.InventoryCommon.intListToJson(list)
     return string.format("[%s]", table.concat(list, ","))
 end
 
-local CONTAINERS_DB_PATTERN = string.format([["([^"]+%%%s)"]], constants.CONTAINER_SUFFIX) -- escape . in suffix
+local CONTAINERS_DB_PATTERN = string.format([[.+%%%s]], constants.CONTAINER_SUFFIX) -- escape . in suffix
 --- Strips the provided container id out of any items that have it listed.
 function _G.InventoryCommon.removeContainerFromDb(databank, containerId)
-    local allKeys = databank.getKeys()
-    local containerList, prefix, suffix, replaceText
-    for itemContainers in string.gmatch(allKeys, CONTAINERS_DB_PATTERN) do
-        containerList = databank.getStringValue(itemContainers)
+    local containerList, prefix, suffix, replaceText, changed
+    for _, itemContainer in pairs(databank.getKeyList()) do
+        if not string.match(itemContainer, CONTAINERS_DB_PATTERN) then
+            goto continue
+        end
+        containerList = databank.getStringValue(itemContainer)
 
-        local prefix, suffix, changed
+        changed = false
         repeat
             prefix, suffix = string.match(containerList, "(%D)%s*" .. containerId .. "%s*(%D)")
             if not prefix then
@@ -66,8 +68,10 @@ function _G.InventoryCommon.removeContainerFromDb(databank, containerId)
         until not prefix
 
         if changed then
-            databank.setStringValue(itemContainers, containerList)
+            databank.setStringValue(itemContainer, containerList)
         end
+
+        ::continue::
     end
 end
 
@@ -76,7 +80,7 @@ local ITEM_CONTAINER_PATTERN = ".-%" .. constants.CONTAINER_SUFFIX .. "$" -- esc
 function _G.InventoryCommon.validateDb(databank)
     local keyCount = {}
     local containerCount = {}
-    for key in string.gmatch(databank.getKeys(), "\"(.-)\"") do
+    for _, key in pairs(databank.getKeyList()) do
         keyCount[key] = (keyCount[key] or 0) + 1
 
         if string.match(key, ITEM_CONTAINER_PATTERN) then
