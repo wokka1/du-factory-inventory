@@ -1,0 +1,11 @@
+{
+    "slots":{
+        "-1":{"name":"unit","type":{"events":[],"methods":[]}},
+        "-4":{"name":"system","type":{"events":[],"methods":[]}}
+    },
+    "handlers":[
+        {"code":"system.print(\"=== CHECKING _G.displays ===\")\n\nif _G.displays then\n    system.print(\"SUCCESS: _G.displays is loaded!\")\n    \n    local count = 0\n    for slotName, config in pairs(_G.displays) do\n        count = count + 1\n        system.print(\"  Screen slot: \" .. tostring(slotName))\n        \n        if config.tables then\n            system.print(\"    Tables: \" .. #config.tables)\n        end\n    end\n    \n    system.print(\"Total screens configured: \" .. count)\n    \n    if count == 0 then\n        system.print(\"\")\n        system.print(\"WARNING: _G.displays exists but is empty!\")\n        system.print(\"Make sure ore_pure_config.lua sets _G.displays[screen1]\")\n    end\nelse\n    system.print(\"PROBLEM: _G.displays is NIL!\")\n    system.print(\"\")\n    system.print(\"This means ore_pure_config.lua is NOT loaded in a library slot.\")\n    system.print(\"\")\n    system.print(\"TO FIX:\")\n    system.print(\"1. On the PROGRAMMING BOARD (not screen)\")\n    system.print(\"2. Add ore_pure_config.lua to a LIBRARY SLOT\")\n    system.print(\"3. Library slot filter: onStart(), Slot Key: -5\")\n    system.print(\"4. This must load BEFORE the main display script\")\nend\n\nunit.exit()","filter":{"args":[],"signature":"onStart()","slotKey":"-1"},"key":"0"}
+    ],
+    "methods":[],
+    "events":[]
+}
