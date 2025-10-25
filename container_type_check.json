@@ -1,0 +1,24 @@
+{
+    "slots":{
+        "0":{"name":"slot1","type":{"events":[],"methods":[]}},
+        "1":{"name":"slot2","type":{"events":[],"methods":[]}},
+        "2":{"name":"slot3","type":{"events":[],"methods":[]}},
+        "3":{"name":"slot4","type":{"events":[],"methods":[]}},
+        "4":{"name":"slot5","type":{"events":[],"methods":[]}},
+        "5":{"name":"slot6","type":{"events":[],"methods":[]}},
+        "6":{"name":"slot7","type":{"events":[],"methods":[]}},
+        "7":{"name":"slot8","type":{"events":[],"methods":[]}},
+        "8":{"name":"slot9","type":{"events":[],"methods":[]}},
+        "9":{"name":"slot10","type":{"events":[],"methods":[]}},
+        "-1":{"name":"unit","type":{"events":[],"methods":[]}},
+        "-2":{"name":"construct","type":{"events":[],"methods":[]}},
+        "-3":{"name":"player","type":{"events":[],"methods":[]}},
+        "-4":{"name":"system","type":{"events":[],"methods":[]}},
+        "-5":{"name":"library","type":{"events":[],"methods":[]}}
+    },
+    "handlers":[
+        {"code":"system.print(\"=== CONTAINER TYPE CHECK ===\")\nsystem.print(\"\")\n\nlocal containerCount = 0\nlocal itemContainers = 0\nlocal containerGroups = 0\nlocal containerHubs = 0\n\nfor slot_name, slot in pairs(unit) do\n    if type(slot) == \"table\" and slot.getClass then\n        local className = slot.getClass()\n        if string.match(className, \"Container\") then\n            containerCount = containerCount + 1\n            local id = slot.getLocalId()\n            system.print(\"Slot \" .. slot_name .. \": \" .. className .. \" (ID: \" .. id .. \")\")\n            \n            if className == \"ItemContainer\" then\n                itemContainers = itemContainers + 1\n            elseif string.match(className, \"ContainerGroup\") then\n                containerGroups = containerGroups + 1\n            elseif string.match(className, \"ContainerHub\") then\n                containerHubs = containerHubs + 1\n            end\n        end\n    end\nend\n\nsystem.print(\"\")\nsystem.print(\"=== SUMMARY ===\")\nsystem.print(\"Total containers: \" .. containerCount)\nsystem.print(\"ItemContainer: \" .. itemContainers)\nsystem.print(\"ContainerGroup: \" .. containerGroups)\nsystem.print(\"ContainerHub: \" .. containerHubs)\nsystem.print(\"\")\nsystem.print(\"Original code looked for: Container%a+Group\")\nif containerGroups > 0 or containerHubs > 0 then\n    system.print(\"MATCH: You have compatible containers!\")\nelse\n    system.print(\"NO MATCH: Only ItemContainers found\")\n    system.print(\"This might be why onContentUpdate doesn't work!\")\nend\n\nunit.exit()","filter":{"args":[],"signature":"onStart()","slotKey":"-1"},"key":"0"}
+    ],
+    "methods":[],
+    "events":[]
+}
