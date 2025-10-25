@@ -1,0 +1,24 @@
+{
+    "slots":{
+        "0":{"name":"slot1","type":{"events":[],"methods":[]}},
+        "1":{"name":"slot2","type":{"events":[],"methods":[]}},
+        "2":{"name":"slot3","type":{"events":[],"methods":[]}},
+        "3":{"name":"slot4","type":{"events":[],"methods":[]}},
+        "4":{"name":"slot5","type":{"events":[],"methods":[]}},
+        "5":{"name":"slot6","type":{"events":[],"methods":[]}},
+        "6":{"name":"slot7","type":{"events":[],"methods":[]}},
+        "7":{"name":"slot8","type":{"events":[],"methods":[]}},
+        "8":{"name":"slot9","type":{"events":[],"methods":[]}},
+        "9":{"name":"slot10","type":{"events":[],"methods":[]}},
+        "-1":{"name":"unit","type":{"events":[],"methods":[]}},
+        "-2":{"name":"construct","type":{"events":[],"methods":[]}},
+        "-3":{"name":"player","type":{"events":[],"methods":[]}},
+        "-4":{"name":"system","type":{"events":[],"methods":[]}},
+        "-5":{"name":"library","type":{"events":[],"methods":[]}}
+    },
+    "handlers":[
+        {"code":"system.print(\"=== SLOT CONTENTS ===\")\nsystem.print(\"\")\n\nfor slot_name, slot in pairs(unit) do\n    if type(slot) == \"table\" and slot.getClass then\n        local className = slot.getClass()\n        local id = slot.getLocalId()\n        system.print(slot_name .. \": \" .. className .. \" (ID: \" .. id .. \")\")\n        \n        -- Test pattern matches\n        if string.match(className, \"Container%a+Group\") then\n            system.print(\"  -> MATCHES: Container%a+Group\")\n        end\n        if string.match(className, \"Container\") then\n            system.print(\"  -> MATCHES: Container (generic)\")\n        end\n    end\nend\n\nunit.exit()","filter":{"args":[],"signature":"onStart()","slotKey":"-1"},"key":"0"}
+    ],
+    "methods":[],
+    "events":[]
+}
