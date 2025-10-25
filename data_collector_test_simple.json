@@ -1,0 +1,26 @@
+{
+    "slots":{
+        "0":{"name":"slot1","type":{"events":[],"methods":[]}},
+        "1":{"name":"slot2","type":{"events":[],"methods":[]}},
+        "2":{"name":"slot3","type":{"events":[],"methods":[]}},
+        "3":{"name":"slot4","type":{"events":[],"methods":[]}},
+        "4":{"name":"slot5","type":{"events":[],"methods":[]}},
+        "5":{"name":"slot6","type":{"events":[],"methods":[]}},
+        "6":{"name":"slot7","type":{"events":[],"methods":[]}},
+        "7":{"name":"slot8","type":{"events":[],"methods":[]}},
+        "8":{"name":"slot9","type":{"events":[],"methods":[]}},
+        "9":{"name":"slot10","type":{"events":[],"methods":[]}},
+        "-1":{"name":"unit","type":{"events":[],"methods":[]}},
+        "-2":{"name":"construct","type":{"events":[],"methods":[]}},
+        "-3":{"name":"player","type":{"events":[],"methods":[]}},
+        "-4":{"name":"system","type":{"events":[],"methods":[]}},
+        "-5":{"name":"library","type":{"events":[],"methods":[]}}
+    },
+    "handlers":[
+        {"code":"local debugIndex = 0\nlocal function debugPrint(msg)\n    if screen then\n        screen.addText(0, debugIndex * 2.5, 2.5, msg)\n        debugIndex = debugIndex + 1\n    end\n    system.print(msg)\nend\n\nlocal startTime = system.getArkTime()\nlocal function getElapsed()\n    return string.format(\"%.1fs\", system.getArkTime() - startTime)\nend\n\n-- Find container in slot 8\nlocal container = nil\nfor slot_name, slot in pairs(unit) do\n    if slot_name == \"slot8\" then\n        if type(slot) == \"table\" and slot.getClass then\n            local className = slot.getClass()\n            if string.match(className, \"Container\") then\n                container = slot\n                debugPrint(\"Found slot8: Container ID \" .. slot.getLocalId())\n                break\n            end\n        end\n    end\nend\n\nif not container then\n    debugPrint(\"ERROR: No container in slot8\")\n    unit.exit()\nend\n\n_G.container = container\n_G.debugPrint = debugPrint\n_G.getElapsed = getElapsed\n\ndebugPrint(\"===================================\")\ndebugPrint(\"SIMPLE TEST - Slot 8 Only\")\ndebugPrint(\"===================================\")\ndebugPrint(\"\")\n\n-- Step 1: First updateContent\ndebugPrint(\"[\" .. getElapsed() .. \"] Step 1: First updateContent()\")\nlocal result1 = container.updateContent()\ndebugPrint(\"[\" .. getElapsed() .. \"] Result: \" .. tostring(result1))\ndebugPrint(\"\")\n\n-- Step 2: Wait 31s, then second updateContent\ndebugPrint(\"[\" .. getElapsed() .. \"] Step 2: Waiting 31s...\")\nunit.setTimer(\"step2\", 31)\n","filter":{"args":[],"signature":"onStart()","slotKey":"-1"},"key":"0"},
+        {"code":"_G.debugPrint(\"[\" .. _G.getElapsed() .. \"] Step 2: Second updateContent()\")\nlocal result2 = _G.container.updateContent()\n_G.debugPrint(\"[\" .. _G.getElapsed() .. \"] Result: \" .. tostring(result2))\n_G.debugPrint(\"\")\n_G.debugPrint(\"[\" .. _G.getElapsed() .. \"] Step 3: Waiting 31s...\")\nunit.setTimer(\"step3\", 31)","filter":{"args":[{"value":"step2"}],"signature":"tick(timerId)","slotKey":"-1"},"key":"1"},
+        {"code":"_G.debugPrint(\"[\" .. _G.getElapsed() .. \"] Step 3: Calling getContent()\")\nlocal items = _G.container.getContent()\n_G.debugPrint(\"[\" .. _G.getElapsed() .. \"] Items returned: \" .. #items)\nif #items > 0 then\n    for _, item in pairs(items) do\n        local itemData = system.getItem(item.id)\n        _G.debugPrint(\"[\" .. _G.getElapsed() .. \"]   - \" .. itemData.displayName .. \" x\" .. item.quantity)\n    end\n    _G.debugPrint(\"[\" .. _G.getElapsed() .. \"] SUCCESS!\")\nelse\n    _G.debugPrint(\"[\" .. _G.getElapsed() .. \"] FAILED: No items\")\nend\n_G.debugPrint(\"\")\n_G.debugPrint(\"===================================\")\n_G.debugPrint(\"[\" .. _G.getElapsed() .. \"] Test complete\")\n_G.debugPrint(\"===================================\")\nunit.exit()","filter":{"args":[{"value":"step3"}],"signature":"tick(timerId)","slotKey":"-1"},"key":"2"}
+    ],
+    "methods":[],
+    "events":[]
+}
