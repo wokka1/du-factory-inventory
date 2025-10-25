@@ -1,0 +1,12 @@
+{
+    "slots":{
+        "0":{"name":"databank","type":{"events":[],"methods":[]}},
+        "-1":{"name":"unit","type":{"events":[],"methods":[]}},
+        "-4":{"name":"system","type":{"events":[],"methods":[]}}
+    },
+    "handlers":[
+        {"code":"if not databank then\n    system.print(\"ERROR: No databank connected!\")\n    unit.exit()\n    return\nend\n\nlocal keys = databank.getKeyList()\nsystem.print(\"=== DATABANK KEYS (\" .. #keys .. \" total) ===\")\n\nif #keys == 0 then\n    system.print(\"Databank is EMPTY!\")\n    system.print(\"You need to run the scanner first.\")\nelse\n    -- Group keys by type\n    local itemKeys = {}\n    local containerListKeys = {}\n    local containerDetailKeys = {}\n    local otherKeys = {}\n    \n    for _, key in ipairs(keys) do\n        if string.match(key, \"^c%.\") then\n            table.insert(containerDetailKeys, key)\n        elseif string.match(key, \"%.c$\") then\n            table.insert(containerListKeys, key)\n        elseif string.match(key, \"^[a-z]\") then\n            table.insert(itemKeys, key)\n        else\n            table.insert(otherKeys, key)\n        end\n    end\n    \n    if #itemKeys > 0 then\n        system.print(\"\")\n        system.print(\"ITEM KEYS (\" .. #itemKeys .. \"):\")\n        for _, key in ipairs(itemKeys) do\n            system.print(\"  \" .. key)\n        end\n    end\n    \n    if #containerListKeys > 0 then\n        system.print(\"\")\n        system.print(\"CONTAINER LIST KEYS (\" .. #containerListKeys .. \"):\")\n        for _, key in ipairs(containerListKeys) do\n            system.print(\"  \" .. key)\n        end\n    end\n    \n    if #containerDetailKeys > 0 then\n        system.print(\"\")\n        system.print(\"CONTAINER DETAIL KEYS (\" .. #containerDetailKeys .. \"):\")\n        for i = 1, math.min(10, #containerDetailKeys) do\n            system.print(\"  \" .. containerDetailKeys[i])\n        end\n        if #containerDetailKeys > 10 then\n            system.print(\"  ... and \" .. (#containerDetailKeys - 10) .. \" more\")\n        end\n    end\n    \n    if #otherKeys > 0 then\n        system.print(\"\")\n        system.print(\"OTHER KEYS (\" .. #otherKeys .. \"):\")\n        for _, key in ipairs(otherKeys) do\n            system.print(\"  \" .. key)\n        end\n    end\nend\n\nunit.exit()","filter":{"args":[],"signature":"onStart()","slotKey":"-1"},"key":"0"}
+    ],
+    "methods":[],
+    "events":[]
+}
