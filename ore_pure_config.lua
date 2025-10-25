@@ -95,6 +95,6 @@ if not _G.displays then
     _G.displays = {}
 end
 
--- Link to screen1 (the screen slot on the programming board)
--- Change if your screen is in a different slot: screen1, screen2, slot1, etc.
-_G.displays[screen1] = screenConfig
+-- Link to slot1 (the screen slot on the programming board)
+-- Change if your screen is in a different slot: slot1, slot2, screen1, etc.
+_G.displays[slot1] = screenConfig
