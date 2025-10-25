@@ -1,0 +1,12 @@
+{
+    "slots":{
+        "0":{"name":"databank","type":{"events":[],"methods":[]}},
+        "-1":{"name":"unit","type":{"events":[],"methods":[]}},
+        "-4":{"name":"system","type":{"events":[],"methods":[]}}
+    },
+    "handlers":[
+        {"code":"if not databank then\n    system.print(\"ERROR: No databank connected!\")\n    unit.exit()\n    return\nend\n\nlocal keys = databank.getKeyList()\nsystem.print(\"=== HASKEY vs GETKEYS TEST ===\")\nsystem.print(\"Total keys from getKeyList(): \" .. #keys)\nsystem.print(\"\")\n\n-- Show first 10 keys from getKeyList()\nsystem.print(\"First 10 keys from getKeyList():\")\nfor i = 1, math.min(10, #keys) do\n    system.print(\"  [\" .. i .. \"] '\" .. keys[i] .. \"'\")\nend\nsystem.print(\"\")\n\n-- Test if those same keys work with hasKey()\nsystem.print(\"Testing hasKey() on those same keys:\")\nfor i = 1, math.min(10, #keys) do\n    local key = keys[i]\n    local result = databank.hasKey(key)\n    system.print(\"  hasKey('\" .. key .. \"') = \" .. tostring(result) .. \" (raw: \" .. result .. \")\")\nend\nsystem.print(\"\")\n\n-- Test specific ore keys\nlocal testKeys = {\"hematite\", \"bauxite\", \"coal\", \"quartz\", \"chromite\"}\nsystem.print(\"Testing specific ore keys:\")\nfor _, key in ipairs(testKeys) do\n    local result = databank.hasKey(key)\n    system.print(\"  hasKey('\" .. key .. \"') = \" .. tostring(result) .. \" (raw: \" .. result .. \")\")\n    \n    -- Also check if it's in the getKeyList() results\n    local foundInList = false\n    for _, listKey in ipairs(keys) do\n        if listKey == key then\n            foundInList = true\n            break\n        end\n    end\n    system.print(\"    Found in getKeyList: \" .. tostring(foundInList))\nend\n\nunit.exit()","filter":{"args":[],"signature":"onStart()","slotKey":"-1"},"key":"0"}
+    ],
+    "methods":[],
+    "events":[]
+}
