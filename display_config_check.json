@@ -1,0 +1,15 @@
+{
+    "slots":{
+        "0":{"name":"screen","type":{"events":[],"methods":[]}},
+        "-1":{"name":"unit","type":{"events":[],"methods":[]}},
+        "-2":{"name":"construct","type":{"events":[],"methods":[]}},
+        "-3":{"name":"player","type":{"events":[],"methods":[]}},
+        "-4":{"name":"system","type":{"events":[],"methods":[]}},
+        "-5":{"name":"library","type":{"events":[],"methods":[]}}
+    },
+    "handlers":[
+        {"code":"system.print(\"===== DISPLAY CONFIG CHECK =====\")\nsystem.print(\"\")\n\nif not _G.displays then\n    system.print(\"ERROR: _G.displays is nil!\")\n    system.print(\"The screen configuration was not loaded.\")\n    system.print(\"You need to load ore-pure.lua in a library slot first.\")\n    unit.exit()\n    return\nend\n\nlocal displayCount = 0\nfor slot, config in pairs(_G.displays) do\n    displayCount = displayCount + 1\n    system.print(\"Found display config for: \" .. tostring(slot))\n    system.print(\"  Tables: \" .. #config.tables)\n    \n    local itemCount = 0\n    for _, table in pairs(config.tables) do\n        for _, row in pairs(table.rows) do\n            for _, item in pairs(row) do\n                itemCount = itemCount + 1\n            end\n        end\n    end\n    system.print(\"  Total items to display: \" .. itemCount)\nend\n\nif displayCount == 0 then\n    system.print(\"WARNING: _G.displays exists but is empty!\")\n    system.print(\"No screen configurations loaded.\")\nelse\n    system.print(\"\")\n    system.print(\"Display configuration loaded successfully!\")\n    system.print(\"Total displays configured: \" .. displayCount)\nend\n\nsystem.print(\"\")\nif not _G.containers then\n    system.print(\"Note: _G.containers is nil (optional)\")\nelse\n    local containerCount = 0\n    for _ in pairs(_G.containers) do\n        containerCount = containerCount + 1\n    end\n    system.print(\"_G.containers has \" .. containerCount .. \" entries\")\nend\n\nunit.exit()\n","filter":{"args":[],"signature":"onStart()","slotKey":"-1"},"key":"0"}
+    ],
+    "methods":[],
+    "events":[]
+}
