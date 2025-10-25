@@ -128,6 +128,10 @@ local function processContainer(container)
     containerStatus[container].complete = true
 end
 
+-- Note: The actual data_collector.json uses a different approach
+-- It batches all updateContent() calls, then waits for server update
+-- This approach is deprecated and kept for reference only
+
 function _G.updateTick()
     for _, container in pairs(slots.containers) do
         if not containerStatus[container].available then
@@ -160,5 +164,7 @@ function _G.contentUpdated(slot)
     _G.updateTick()
 end
 
+-- WARNING: This source file is out of sync with data_collector.json
+-- The compiled version uses unit.setTimer("scan", totalWait) and calls _G.scanContainers()
 unit.setTimer("update", waitTime)
 _G.updateTick()
