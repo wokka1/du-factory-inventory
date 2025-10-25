@@ -1,0 +1,12 @@
+{
+    "slots":{
+        "0":{"name":"databank","type":{"events":[],"methods":[]}},
+        "-1":{"name":"unit","type":{"events":[],"methods":[]}},
+        "-4":{"name":"system","type":{"events":[],"methods":[]}}
+    },
+    "handlers":[
+        {"code":"if not databank then\n    system.print(\"ERROR: No databank connected!\")\n    unit.exit()\n    return\nend\n\nlocal keys = databank.getKeyList()\nsystem.print(\"=== HASKEY TEST ===\")\nsystem.print(\"Total keys: \" .. #keys)\nsystem.print(\"\")\n\nsystem.print(\"First 10 keys:\")\nfor i = 1, math.min(10, #keys) do\n    system.print(\"  [\" .. i .. \"] \" .. keys[i])\nend\nsystem.print(\"\")\n\nlocal testKeys = {\"hematite\", \"bauxite\", \"coal\", \"quartz\", \"hematite.c\", \"bauxite.c\", \"coal.c\", \"quartz.c\"}\nsystem.print(\"Testing hasKey():\")\nfor _, key in ipairs(testKeys) do\n    local result = databank.hasKey(key)\n    system.print(\"  hasKey('\" .. key .. \"') = \" .. tostring(result))\n    if result == 1 then\n        system.print(\"    Value type: \" .. type(databank.getStringValue(key)))\n    end\nend\n\nunit.exit()","filter":{"args":[],"signature":"onStart()","slotKey":"-1"},"key":"0"}
+    ],
+    "methods":[],
+    "events":[]
+}
