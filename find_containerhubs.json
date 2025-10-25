@@ -1,0 +1,11 @@
+{
+    "slots":{
+        "-1":{"name":"unit","type":{"events":[],"methods":[]}},
+        "-2":{"name":"core","type":{"events":[],"methods":[]}}
+    },
+    "handlers":[
+        {"code":"system.print(\"=== SEARCHING ENTIRE CONSTRUCT ===\")\nsystem.print(\"\")\n\nlocal allElements = core.getElementIdList()\nsystem.print(\"Total elements on construct: \" .. #allElements)\nsystem.print(\"\")\n\nlocal containerHubs = 0\nlocal containerGroups = 0\nlocal itemContainers = 0\n\nfor _, id in ipairs(allElements) do\n    local elementType = core.getElementTypeById(id)\n    \n    if string.match(elementType, \"ContainerHub\") then\n        containerHubs = containerHubs + 1\n        local name = core.getElementNameById(id)\n        system.print(\"ContainerHub: \" .. name .. \" (ID: \" .. id .. \")\")\n    elseif string.match(elementType, \"ContainerGroup\") then\n        containerGroups = containerGroups + 1\n        local name = core.getElementNameById(id)\n        system.print(\"ContainerGroup: \" .. name .. \" (ID: \" .. id .. \")\")\n    elseif elementType == \"ItemContainer\" then\n        itemContainers = itemContainers + 1\n    end\nend\n\nsystem.print(\"\")\nsystem.print(\"=== SUMMARY ===\")\nsystem.print(\"ContainerHubs: \" .. containerHubs)\nsystem.print(\"ContainerGroups: \" .. containerGroups)\nsystem.print(\"ItemContainers: \" .. itemContainers)\nsystem.print(\"\")\n\nif containerHubs > 0 or containerGroups > 0 then\n    system.print(\"You HAVE ContainerHubs/Groups!\")\n    system.print(\"Link them to the programming board slots.\")\nelse\n    system.print(\"NO ContainerHubs/Groups on construct.\")\n    system.print(\"Your hardware uses ItemContainers only.\")\n    system.print(\"The original code won't work - need different approach.\")\nend\n\nunit.exit()","filter":{"args":[],"signature":"onStart()","slotKey":"-1"},"key":"0"}
+    ],
+    "methods":[],
+    "events":[]
+}
