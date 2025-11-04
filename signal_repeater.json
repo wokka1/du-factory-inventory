@@ -13,7 +13,7 @@
         },
         {
             "code":"-- Timer handler: fires next signal\n\nif timerId == \"fire_next\" then\n    -- Fire the signal\n    if slot1.fire then\n        slot1.fire()\n    elseif slot1.activate then\n        slot1.activate()\n    end\n    \n    _G.repeatCount = _G.repeatCount + 1\n    system.print(\"[\" .. _G.repeatCount .. \"/\" .. _G.maxRepeats .. \"] FIRED\")\n    \n    -- Schedule next fire if not done\n    if _G.repeatCount < _G.maxRepeats then\n        unit.setTimer(\"fire_next\", _G.signalDelay)\n    else\n        system.print(\"=\" .. string.rep(\"=\", 40))\n        system.print(\"ALL SIGNALS COMPLETE!\")\n        system.print(\"=\" .. string.rep(\"=\", 40))\n    end\nend",
-            "filter":{"args":[{"value":"*"}],"signature":"tick(timerId)","slotKey":"-1"},
+            "filter":{"args":[{"value":"fire_next"}],"signature":"tick(timerId)","slotKey":"-1"},
             "key":"1"
         }
     ],
