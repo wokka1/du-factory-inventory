@@ -1,18 +1,27 @@
 {
     "slots":{
         "0":{"name":"slot1","type":{"events":[],"methods":[]}},
+        "1":{"name":"slot2","type":{"events":[],"methods":[]}},
+        "2":{"name":"slot3","type":{"events":[],"methods":[]}},
+        "3":{"name":"slot4","type":{"events":[],"methods":[]}},
+        "4":{"name":"slot5","type":{"events":[],"methods":[]}},
+        "5":{"name":"slot6","type":{"events":[],"methods":[]}},
+        "6":{"name":"slot7","type":{"events":[],"methods":[]}},
+        "7":{"name":"slot8","type":{"events":[],"methods":[]}},
+        "8":{"name":"slot9","type":{"events":[],"methods":[]}},
+        "9":{"name":"slot10","type":{"events":[],"methods":[]}},
         "-1":{"name":"unit","type":{"events":[],"methods":[]}},
         "-3":{"name":"player","type":{"events":[],"methods":[]}},
         "-4":{"name":"system","type":{"events":[],"methods":[]}}
     },
     "handlers":[
         {
-            "code":"-- Signal Repeater: Fire signal 10 times with 1 second pause between each\n-- Works with: Fireworks, Manual Switches, Doors, Lights, or any element with fire() or activate()\n\n_G.repeatCount = 0\n_G.maxRepeats = 10\n_G.signalDelay = 1.0  -- 1 second between signals\n\nsystem.print(\"=\" .. string.rep(\"=\", 40))\nsystem.print(\"Signal Repeater Started\")\nsystem.print(\"Connected element: slot1\")\nsystem.print(\"Will fire \" .. _G.maxRepeats .. \" times with \" .. (_G.signalDelay * 1000) .. \"ms pause\")\nsystem.print(\"=\" .. string.rep(\"=\", 40))\n\n-- Fire first signal\nif slot1.fire then\n    slot1.fire()\nelseif slot1.activate then\n    slot1.activate()\nelse\n    system.print(\"ERROR: slot1 doesn't support fire() or activate()\")\n    unit.exit()\nend\n\n_G.repeatCount = 1\nsystem.print(\"[\" .. _G.repeatCount .. \"/\" .. _G.maxRepeats .. \"] FIRED\")\n\n-- Schedule next fire\nif _G.repeatCount < _G.maxRepeats then\n    unit.setTimer(\"fire_next\", _G.signalDelay)\nelse\n    system.print(\"=\" .. string.rep(\"=\", 40))\n    system.print(\"ALL SIGNALS COMPLETE!\")\n    system.print(\"=\" .. string.rep(\"=\", 40))\nend",
+            "code":"-- Signal Repeater: Fire up to 10 fireworks simultaneously, 10 times with 1 second pause\n-- Connect firework dispensers to slots 1-10\n\n_G.repeatCount = 0\n_G.maxRepeats = 10\n_G.signalDelay = 1.0  -- 1 second between signals\n\n-- Build list of active slots\n_G.slots = {slot1, slot2, slot3, slot4, slot5, slot6, slot7, slot8, slot9, slot10}\n_G.activeSlots = {}\nfor i, slot in ipairs(_G.slots) do\n    if slot and (slot.fire or slot.activate) then\n        table.insert(_G.activeSlots, {index = i, slot = slot})\n    end\nend\n\nsystem.print(\"=\" .. string.rep(\"=\", 40))\nsystem.print(\"Signal Repeater Started\")\nsystem.print(\"Found \" .. #_G.activeSlots .. \" connected fireworks\")\nsystem.print(\"Will fire \" .. _G.maxRepeats .. \" times with \" .. (_G.signalDelay * 1000) .. \"ms pause\")\nsystem.print(\"=\" .. string.rep(\"=\", 40))\n\nif #_G.activeSlots == 0 then\n    system.print(\"ERROR: No fireworks connected to any slots\")\n    unit.exit()\nend\n\n-- Function to fire all active slots\nfunction _G.fireAll()\n    for _, item in ipairs(_G.activeSlots) do\n        if item.slot.fire then\n            item.slot.fire()\n        elseif item.slot.activate then\n            item.slot.activate()\n        end\n    end\nend\n\n-- Fire first volley\n_G.fireAll()\n_G.repeatCount = 1\nsystem.print(\"[\" .. _G.repeatCount .. \"/\" .. _G.maxRepeats .. \"] FIRED \" .. #_G.activeSlots .. \" fireworks\")\n\n-- Schedule next fire\nif _G.repeatCount < _G.maxRepeats then\n    unit.setTimer(\"fire_next\", _G.signalDelay)\nelse\n    unit.stopTimer(\"fire_next\")\n    system.print(\"=\" .. string.rep(\"=\", 40))\n    system.print(\"ALL SIGNALS COMPLETE!\")\n    system.print(\"=\" .. string.rep(\"=\", 40))\nend",
             "filter":{"args":[],"signature":"onStart()","slotKey":"-1"},
             "key":"0"
         },
         {
-            "code":"-- Timer handler: fires next signal\n\nif timerId == \"fire_next\" then\n    -- Fire the signal\n    if slot1.fire then\n        slot1.fire()\n    elseif slot1.activate then\n        slot1.activate()\n    end\n    \n    _G.repeatCount = _G.repeatCount + 1\n    system.print(\"[\" .. _G.repeatCount .. \"/\" .. _G.maxRepeats .. \"] FIRED\")\n    \n    -- Schedule next fire if not done\n    if _G.repeatCount < _G.maxRepeats then\n        unit.setTimer(\"fire_next\", _G.signalDelay)\n    else\n        unit.stopTimer(\"fire_next\")\n        system.print(\"=\" .. string.rep(\"=\", 40))\n        system.print(\"ALL SIGNALS COMPLETE!\")\n        system.print(\"=\" .. string.rep(\"=\", 40))\n    end\nend",
+            "code":"-- Timer handler: fires next volley\n\nif timerId == \"fire_next\" then\n    -- Fire all active slots\n    _G.fireAll()\n    \n    _G.repeatCount = _G.repeatCount + 1\n    system.print(\"[\" .. _G.repeatCount .. \"/\" .. _G.maxRepeats .. \"] FIRED \" .. #_G.activeSlots .. \" fireworks\")\n    \n    -- Schedule next fire if not done\n    if _G.repeatCount < _G.maxRepeats then\n        unit.setTimer(\"fire_next\", _G.signalDelay)\n    else\n        unit.stopTimer(\"fire_next\")\n        system.print(\"=\" .. string.rep(\"=\", 40))\n        system.print(\"ALL SIGNALS COMPLETE!\")\n        system.print(\"=\" .. string.rep(\"=\", 40))\n    end\nend",
             "filter":{"args":[{"value":"fire_next"}],"signature":"tick(timerId)","slotKey":"-1"},
             "key":"1"
         }
