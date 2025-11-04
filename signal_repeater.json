@@ -1,0 +1,22 @@
+{
+    "slots":{
+        "0":{"name":"slot1","type":{"events":[],"methods":[]}},
+        "-1":{"name":"unit","type":{"events":[],"methods":[]}},
+        "-3":{"name":"player","type":{"events":[],"methods":[]}},
+        "-4":{"name":"system","type":{"events":[],"methods":[]}}
+    },
+    "handlers":[
+        {
+            "code":"-- Signal Repeater: Outputs a signal, pauses 250ms, repeats 10 times\n\n_G.repeatCount = 0\n_G.maxRepeats = 10\n_G.signalDelay = 0.25  -- 250ms in seconds\n\nsystem.print(\"Signal Repeater Started\")\nsystem.print(\"Will send signal 10 times with 250ms pause between each\")\n\n-- Send first signal\nunit.sendSignal(\"signal_out\", 1)\n_G.repeatCount = 1\nsystem.print(\"Signal 1/10 sent\")\n\n-- Set timer for next signal\nif _G.repeatCount < _G.maxRepeats then\n    unit.setTimer(\"repeat_signal\", _G.signalDelay)\nelse\n    system.print(\"All signals sent. Complete!\")\nend",
+            "filter":{"args":[],"signature":"onStart()","slotKey":"-1"},
+            "key":"0"
+        },
+        {
+            "code":"-- Timer handler: sends signal and schedules next one\n\nif timerId == \"repeat_signal\" then\n    -- Send signal\n    unit.sendSignal(\"signal_out\", 1)\n    _G.repeatCount = _G.repeatCount + 1\n    system.print(\"Signal \" .. _G.repeatCount .. \"/\" .. _G.maxRepeats .. \" sent\")\n    \n    -- Schedule next signal if not done\n    if _G.repeatCount < _G.maxRepeats then\n        unit.setTimer(\"repeat_signal\", _G.signalDelay)\n    else\n        system.print(\"All signals sent. Complete!\")\n    end\nend",
+            "filter":{"args":[{"value":"*"}],"signature":"tick(timerId)","slotKey":"-1"},
+            "key":"1"
+        }
+    ],
+    "methods":[],
+    "events":[]
+}
